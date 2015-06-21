@@ -1,12 +1,13 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Units/Warrior.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game Essentials/PlayerController.cs">
     <Files>
-      <File FileName="Assets/Scripts/Units/Unit.cs" Line="20" Column="66" />
-      <File FileName="Assets/Scripts/Units/Warrior.cs" Line="22" Column="32" />
-      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Game Essentials/Tile.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Game Essentials/GridController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="24" Column="2" />
+      <File FileName="Assets/Scripts/Units/Unit.cs" Line="37" Column="29" />
+      <File FileName="Assets/Scripts/Units/Warrior.cs" Line="106" Column="20" />
+      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="305" Column="83" />
+      <File FileName="Assets/Scripts/Game Essentials/Tile.cs" Line="13" Column="8" />
+      <File FileName="Assets/Scripts/Game Essentials/GridController.cs" Line="48" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

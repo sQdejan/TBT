@@ -95,7 +95,7 @@ public class Warrior : Unit {
 		
 		int enemyWidthIndex = enemyUnitTile.WidthIndex;
 		int enemyHeightIndex = enemyUnitTile.HeightIndex;
-		
+
 		for(int i = -1; i <= 1; i++) {
 			for(int j = -1; j <= 1; j++) {
 				int x = enemyWidthIndex + i;

@@ -10,7 +10,7 @@ public class Tile : MonoBehaviour {
 	[HideInInspector] public bool occupied = false;
 	[HideInInspector] public bool available = false;
 
-	private int heightIndex, widthIndex;
+	public int heightIndex, widthIndex;
 
 	public int HeightIndex {
 		get {

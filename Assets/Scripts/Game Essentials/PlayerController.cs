@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum CursorState {NORMAL, MOVE, NOMOVE, ATTACK, NOATTACK}
 
@@ -206,30 +207,96 @@ public class PlayerController : MonoBehaviour {
 		} 
 	}
 
-	//Change the sprite showing which tiles can be used
+	//Change the sprite showing which tiles can be used - This function is a bit long because of the ISO view
+	//which is fucking wierd :D
 	void ShowPossibleTiles(int possibleMoves) {
 		
 		//Finding the tile the current unit is standing on
 		RaycastHit2D hit = Physics2D.Raycast(activeUnit.transform.position, Vector2.zero, 0, layerTile);
 		
 		GameObject tmpTile = hit.collider.gameObject;
-		
-		int curUnitWidthInd = tmpTile.GetComponent<Tile>().WidthIndex;
-		int curUnitHeightInd = tmpTile.GetComponent<Tile>().HeightIndex;
-		
-		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
-			for(int j = 0; j < GridController.Instance.gridHeight; j++) {
-				if(!GridController.Instance.gridArray[i,j].GetComponent<Tile>().occupied) {
-					if(Mathf.Abs(i - (curUnitWidthInd + curUnitHeightInd - j)) <= possibleMoves && 
-					   Mathf.Abs(j - (curUnitHeightInd - curUnitWidthInd + i)) <= possibleMoves) {
-						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileMove;
-						GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = true;
+
+		List<GameObject> neighboursForChecking = new List<GameObject>();
+		List<GameObject> openList = new List<GameObject>();
+
+		neighboursForChecking.Add(tmpTile);
+
+		for(int i = 0; i < possibleMoves; i++) {
+
+			foreach(GameObject g in neighboursForChecking) {
+				int curTileWidthInd = g.GetComponent<Tile>().WidthIndex;
+				int curTileHeightInd = g.GetComponent<Tile>().HeightIndex;
+
+				//If width is odd, check above - if width is even, check below.
+				if(curTileWidthInd % 2 == 1) {
+					//Check above
+					if(!(curTileHeightInd - 1 < 0)) {
+						//Check top left
+						if(!(curTileWidthInd - 1 < 0)) {
+							int x = curTileWidthInd - 1, y = curTileHeightInd - 1;
+							ChangeSprite(x, y);
+							openList.Add(GridController.Instance.gridArray[curTileWidthInd - 1, curTileHeightInd - 1]);
+						}
+						
+						//Check top right
+						if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
+							int x = curTileWidthInd + 1, y = curTileHeightInd - 1;
+							ChangeSprite(x, y);
+							openList.Add(GridController.Instance.gridArray[curTileWidthInd + 1, curTileHeightInd - 1]);
+						}
+					}
+
+				} else { 
+					//Check below
+					if(!(curTileHeightInd + 1 >= GridController.Instance.gridHeight)) {
+						//Check bot left
+						if(!(curTileWidthInd - 1 < 0)) {
+							int x = curTileWidthInd - 1, y = curTileHeightInd + 1;
+							ChangeSprite(x, y);
+							openList.Add(GridController.Instance.gridArray[x,y]);
+						}
+						
+						//Check bot right
+						if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
+							int x = curTileWidthInd + 1, y = curTileHeightInd + 1;
+							ChangeSprite(x, y);
+							openList.Add(GridController.Instance.gridArray[x,y]);
+						}
 					}
 				}
+
+				//Check neighbour left
+				if(!(curTileWidthInd - 1 < 0)) {
+					int x = curTileWidthInd - 1, y = curTileHeightInd;
+					ChangeSprite(x, y);
+					openList.Add(GridController.Instance.gridArray[x,y]);
+				}
+				
+				//Check neighbour right
+				if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
+					int x = curTileWidthInd + 1, y = curTileHeightInd;
+					ChangeSprite(x, y);
+					openList.Add(GridController.Instance.gridArray[x,y]);
+				}
 			}
+
+			neighboursForChecking.Clear();
+
+			foreach(GameObject g in openList) {
+				neighboursForChecking.Add(g);
+			}
+
+			openList.Clear();
 		}
 	}
 
+	void ChangeSprite(int x, int y) {
+		if(!GridController.Instance.gridArray[x,y].GetComponent<Tile>().occupied) {
+			GridController.Instance.gridArray[x,y].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[x,y].GetComponent<Tile>().spriteTileMove;
+			GridController.Instance.gridArray[x,y].GetComponent<Tile>().available = true;
+		}
+	}
+	
 	//To reset grid if unit is deselected
 	void ClearGrid() {
 		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
@@ -239,4 +306,29 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 	}
+	
+
+	//Change the sprite showing which tiles can be used - Old fucker, for normal view, not ISO
+	//	void ShowPossibleTiles(int possibleMoves) {
+	//		
+	//		//Finding the tile the current unit is standing on
+	//		RaycastHit2D hit = Physics2D.Raycast(activeUnit.transform.position, Vector2.zero, 0, layerTile);
+	//		
+	//		GameObject tmpTile = hit.collider.gameObject;
+	//		
+	//		int curUnitWidthInd = tmpTile.GetComponent<Tile>().WidthIndex;
+	//		int curUnitHeightInd = tmpTile.GetComponent<Tile>().HeightIndex;
+	//		
+	//		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
+	//			for(int j = 0; j < GridController.Instance.gridHeight; j++) {
+	//				if(!GridController.Instance.gridArray[i,j].GetComponent<Tile>().occupied) {
+	//					if(Mathf.Abs(i - curUnitWidthInd) <= possibleMoves && 
+	//					   Mathf.Abs(j - curUnitHeightInd) <= possibleMoves) {
+	//						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileMove;
+	//						GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = true;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
 }

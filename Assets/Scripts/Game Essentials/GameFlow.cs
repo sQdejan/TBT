@@ -3,13 +3,24 @@ using System.Collections;
 
 public class GameFlow : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+#region Singleton
 	
+	private static GameFlow instance;
+	
+	public static GameFlow Instance {
+		get {
+			if(instance == null) {
+				instance = GameObject.FindObjectOfType<GameFlow>();
+			}
+			
+			return instance;
+		}
 	}
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+#endregion
+
+	public int amountOfResourcesPerTurn = 10;
+	public bool playerWillStart = true;
+
+
 }

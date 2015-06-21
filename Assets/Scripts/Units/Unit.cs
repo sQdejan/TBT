@@ -8,6 +8,9 @@ public abstract class Unit : MonoBehaviour {
 	public int possibleMoves;
 	public int health;
 	public int damage;
+	public int resourcesForAttack;
+	public int resourcesForMove;
+
 	public Sprite originalSprite;
 	public Sprite hoverSprite;
 
