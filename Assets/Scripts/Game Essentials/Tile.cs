@@ -3,6 +3,10 @@ using System.Collections;
 
 public class Tile : MonoBehaviour {
 
+	public Sprite spriteTileOriginal;
+	public Sprite spriteTileMove;
+	public Sprite spriteMoveTo;
+
 	[HideInInspector] public bool occupied = false;
 	[HideInInspector] public bool available = false;
 

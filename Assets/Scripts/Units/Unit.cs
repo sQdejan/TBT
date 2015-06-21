@@ -13,8 +13,13 @@ public abstract class Unit : MonoBehaviour {
 
 	public PerformAction CurrentAction; //To assign different methods depending on what should be called
 
-	private GameObject curTile;
+	//The tile that will be moved to, in order to attack. I need this variable in order to reset the sprite if not
+	//hovered above anymore. It can be static because only one unit will be active at any given time
+	public static GameObject attackMoveTile;
 
+	//I need this in order to reset it's stats once a Unit is moving
+	private GameObject curTile;
+	
 	#region Methods to be overridden
 
 	public abstract bool IsAttackPossible(GameObject obj);
@@ -35,7 +40,7 @@ public abstract class Unit : MonoBehaviour {
 	#endregion
 
 	void Start() {
-		//Just to make the tile occupied from start
+		//Make the start tile occupied
 		LayerMask tileLayer = 1 << LayerMask.NameToLayer("Tile");
 		RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.zero, 0, tileLayer);
 		if(hit.collider != null) {
@@ -45,7 +50,7 @@ public abstract class Unit : MonoBehaviour {
 		}
 	}
 
-	void Move(GameObject nextTile) {
+	protected void Move(GameObject nextTile) {
 		curTile.GetComponent<Tile>().occupied = false;
 		curTile.GetComponent<Tile>().available = true;
 
@@ -53,6 +58,10 @@ public abstract class Unit : MonoBehaviour {
 		curTile = nextTile;
 		curTile.GetComponent<Tile>().occupied = true;
 		curTile.GetComponent<Tile>().available = false;
+	}
+
+	protected void Death() {
+		Debug.Log("Death");
 	}
 	
 	//I need the two following methods for automatically

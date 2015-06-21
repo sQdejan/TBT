@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum MouseState {NORMAL, MOVE, NOMOVE, ATTACK, NOATTACK}
+public enum CursorState {NORMAL, MOVE, NOMOVE, ATTACK, NOATTACK}
 
 public class PlayerController : MonoBehaviour {
 
@@ -22,15 +22,15 @@ public class PlayerController : MonoBehaviour {
 #endregion
 
 	public GameObject tileSelectorObject;
-	public Sprite spriteTileOriginal;
-	public Sprite spriteTileMove;
 
 	public Texture2D cursorNormal;
 	public Texture2D cursorMove;
 	public Texture2D cursorNoMove;
 	public Texture2D cursorAttack;
 	public Texture2D cursorNoAttack;
-	
+
+	private CursorState cursorState;
+
 	private LayerMask layerTile;
 	private LayerMask layerUnit;
 	private LayerMask layerEnemy;
@@ -43,8 +43,6 @@ public class PlayerController : MonoBehaviour {
 
 	private bool selectedUnit = false;
 	private bool tookAction = false;
-
-	private MouseState mouseState;
 
 	void Start () {
 		layerTile = 1 << LayerMask.NameToLayer("Tile");
@@ -62,20 +60,20 @@ public class PlayerController : MonoBehaviour {
 			UnitSelectedCast();
 		}
 
-		switch(mouseState) {
-		case MouseState.NORMAL:
+		switch(cursorState) {
+		case CursorState.NORMAL:
 			Cursor.SetCursor(cursorNormal, Vector2.zero, CursorMode.Auto);
 			break;
-		case MouseState.MOVE:
+		case CursorState.MOVE:
 			Cursor.SetCursor(cursorMove, Vector2.zero, CursorMode.Auto);
 			break;
-		case MouseState.NOMOVE:
+		case CursorState.NOMOVE:
 			Cursor.SetCursor(cursorNoMove, Vector2.zero, CursorMode.Auto);
 			break;
-		case MouseState.ATTACK:
+		case CursorState.ATTACK:
 			Cursor.SetCursor(cursorAttack, Vector2.zero, CursorMode.Auto);
 			break;
-		case MouseState.NOATTACK:
+		case CursorState.NOATTACK:
 			Cursor.SetCursor(cursorNoAttack, Vector2.zero, CursorMode.Auto);
 			break;
 		default:
@@ -104,22 +102,29 @@ public class PlayerController : MonoBehaviour {
 				}
 			}
 
-			tileSelectorObject.transform.position = tileSelObjPos;
-			mouseState = MouseState.NORMAL;
+			cursorState = CursorState.NORMAL;
 		}
 		
 		//Select the unit if hovered above one
 		if(activeUnit && Input.GetMouseButtonUp(0)) {
 			ShowPossibleTiles(activeUnit.GetComponent<Unit>().possibleMoves);
 			selectedUnit = true;
-			mouseState = MouseState.MOVE;
+			cursorState = CursorState.MOVE;
 		}
 		
 		//Deselect
 		if((selectedUnit && Input.GetKeyDown(KeyCode.Escape)) || tookAction) {
 			tookAction = false;
 			selectedUnit = false;
+			tileSelectorObject.transform.position = tileSelObjPos;
+			activeTile = null;
 			ClearGrid();
+
+			//Just reset sprites
+			if(activeEnemy) {
+				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+				activeEnemy = null;
+			}
 		}
 	}
 
@@ -141,7 +146,7 @@ public class PlayerController : MonoBehaviour {
 			activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().hoverSprite;
 			foundEnemy = true;
 
-			mouseState = MouseState.ATTACK;
+			cursorState = CursorState.ATTACK;
 		} else {
 			if(activeEnemy) {
 				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
@@ -157,7 +162,11 @@ public class PlayerController : MonoBehaviour {
 			tookAction = true;
 			activeEnemy = null;
 		} else if (activeEnemy && !activeUnit.GetComponent<Unit>().IsAttackPossible(activeEnemy)) {
-			mouseState = MouseState.NOATTACK;
+			cursorState = CursorState.NOATTACK;
+		} else if (!activeEnemy && Unit.attackMoveTile != null) {
+			//Reset the tile sprite if not hovered above anymore
+			Unit.attackMoveTile.GetComponent<SpriteRenderer>().sprite = Unit.attackMoveTile.GetComponent<Tile>().spriteTileMove;
+			Unit.attackMoveTile = null;
 		}
 
 		//As enemy is first priority we just return if we found one
@@ -171,14 +180,14 @@ public class PlayerController : MonoBehaviour {
 			activeTile = tileHit.collider.gameObject;
 
 			if(activeTile.GetComponent<Tile>().occupied) {
-				mouseState = MouseState.NOMOVE;
+				cursorState = CursorState.NOMOVE;
 				return;
 			}
 
 			if(!activeTile.GetComponent<Tile>().available) {
-				mouseState = MouseState.NOMOVE;	
+				cursorState = CursorState.NOMOVE;	
 			} else {
-				mouseState = MouseState.MOVE;
+				cursorState = CursorState.MOVE;
 			}
 
 			tileSelectorObject.transform.position = activeTile.transform.position;
@@ -199,21 +208,21 @@ public class PlayerController : MonoBehaviour {
 
 	//Change the sprite showing which tiles can be used
 	void ShowPossibleTiles(int possibleMoves) {
-
+		
 		//Finding the tile the current unit is standing on
 		RaycastHit2D hit = Physics2D.Raycast(activeUnit.transform.position, Vector2.zero, 0, layerTile);
-
+		
 		GameObject tmpTile = hit.collider.gameObject;
-
+		
 		int curUnitWidthInd = tmpTile.GetComponent<Tile>().WidthIndex;
 		int curUnitHeightInd = tmpTile.GetComponent<Tile>().HeightIndex;
-
+		
 		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
 			for(int j = 0; j < GridController.Instance.gridHeight; j++) {
 				if(!GridController.Instance.gridArray[i,j].GetComponent<Tile>().occupied) {
 					if(Mathf.Abs(i - (curUnitWidthInd + curUnitHeightInd - j)) <= possibleMoves && 
 					   Mathf.Abs(j - (curUnitHeightInd - curUnitWidthInd + i)) <= possibleMoves) {
-						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = spriteTileMove;
+						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileMove;
 						GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = true;
 					}
 				}
@@ -225,7 +234,7 @@ public class PlayerController : MonoBehaviour {
 	void ClearGrid() {
 		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
 			for(int j = 0; j < GridController.Instance.gridHeight; j++) {
-				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = spriteTileOriginal;
+				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileOriginal;
 				GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = false;
 			}
 		}

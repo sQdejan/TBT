@@ -24,7 +24,10 @@ public class GridController : MonoBehaviour {
 	public int gridWidth, gridHeight;
 	public float gridSpacing;
 
-	[HideInInspector]
+	/// <summary>
+	/// Width, height.
+	/// </summary>
+	[HideInInspector] 
 	public GameObject[,] gridArray;
 
 	//Initialise grid

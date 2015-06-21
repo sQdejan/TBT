@@ -6,7 +6,7 @@ public class Warrior : Unit {
 
 	public override bool IsAttackPossible (GameObject obj) {
 
-		int attackRange = possibleMoves + 1;
+		int attackRange = possibleMoves + 2;
 		Tile thisUnitTile = CurTile.GetComponent<Tile>();
 		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
 
@@ -16,7 +16,20 @@ public class Warrior : Unit {
 		int enemyWidthIndex = enemyUnitTile.WidthIndex;
 		int enemyHeightIndex = enemyUnitTile.HeightIndex;
 
-		if(Mathf.Abs(enemyWidthIndex - (thisWidthIndex + thisHeightIndex - enemyHeightIndex)) <= attackRange && Mathf.Abs(enemyHeightIndex - (thisHeightIndex - thisWidthIndex + enemyWidthIndex)) <= attackRange) {
+		//I have to do 2.5 checks:
+		//1. Standin next to it so unit can attack
+		//2.1 If within walking distance so I can walk and attack
+		//2.2 and also if any tile available around it
+		if(Mathf.Abs(thisWidthIndex - enemyWidthIndex) <= 1 && Mathf.Abs(thisHeightIndex - enemyHeightIndex) <= 1) {
+			return true;
+		}
+
+		GameObject closestTile = ClosestTile(obj, thisWidthIndex, thisHeightIndex);
+
+		//I want to mark which tile will be moved to if an attack is possible
+		if((Mathf.Abs(enemyWidthIndex - (thisWidthIndex + thisHeightIndex - enemyHeightIndex)) <= attackRange && Mathf.Abs(enemyHeightIndex - (thisHeightIndex - thisWidthIndex + enemyWidthIndex)) <= attackRange) && closestTile) {
+			attackMoveTile = closestTile;
+			attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteMoveTo;
 			return true;
 		}
 
@@ -40,25 +53,64 @@ public class Warrior : Unit {
 			return;
 		} 
 
-
+		//Else I have to move the unit in order to attack.
+		//To do that, find the closest possible tile to move to
+		Move (ClosestTile(obj, thisWidthIndex, thisHeightIndex));
 	}
 
 	public override void TakeDamage (int damage) {
 		health -= damage;
 	}
 
-	private List<GameObject> AvailableTiles(GameObject obj) {
+	GameObject ClosestTile(GameObject obj, int widthIndex, int heightIndex) {
 
+		List<GameObject> listGameobject = AvailableTiles(obj);
+
+		if(listGameobject.Count == 0) 
+			return null;
+
+		int shortestDistance = int.MaxValue;
+		GameObject shortestDistanceObj = null;
+		
+		foreach(GameObject o in listGameobject) {
+			int oWidth = o.GetComponent<Tile>().WidthIndex;
+			int oHeight = o.GetComponent<Tile>().HeightIndex;
+			
+			int tmpValue = Mathf.Abs(widthIndex - oWidth) + Mathf.Abs(heightIndex - oHeight);
+			
+			if(tmpValue < shortestDistance) {
+				shortestDistance = tmpValue;
+				shortestDistanceObj = o;
+			}
+		}
+
+		return shortestDistanceObj;
+	}
+
+	List<GameObject> AvailableTiles(GameObject obj) {
+		
+		List<GameObject> returnList = new List<GameObject>();
+		
 		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
 		
 		int enemyWidthIndex = enemyUnitTile.WidthIndex;
 		int enemyHeightIndex = enemyUnitTile.HeightIndex;
-
-		//I know that there is a max of eight neighbours because of square setup
-		for(int i = 0; i < 8; i++) {
-
+		
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {
+				int x = enemyWidthIndex + i;
+				if(x < 0 || x >= GridController.Instance.gridWidth)
+					continue;
+				
+				int y = enemyHeightIndex + j;
+				if(y < 0 || y >= GridController.Instance.gridHeight)
+					continue;
+				
+				if(GridController.Instance.gridArray[x,y].GetComponent<Tile>().available) 
+					returnList.Add(GridController.Instance.gridArray[x,y]);
+			}
 		}
-
-		return null;
+		
+		return returnList;
 	}
 }
