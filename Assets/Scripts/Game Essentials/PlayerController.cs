@@ -119,6 +119,7 @@ public class PlayerController : MonoBehaviour {
 			selectedUnit = false;
 			tileSelectorObject.transform.position = tileSelObjPos;
 			activeTile = null;
+//			Unit.attackMoveTile = null;
 			ClearGrid();
 
 			//Just reset sprites
@@ -214,89 +215,43 @@ public class PlayerController : MonoBehaviour {
 		//Finding the tile the current unit is standing on
 		RaycastHit2D hit = Physics2D.Raycast(activeUnit.transform.position, Vector2.zero, 0, layerTile);
 		
-		GameObject tmpTile = hit.collider.gameObject;
-
+		GameObject tmpTileObj = hit.collider.gameObject;
+		
 		List<GameObject> neighboursForChecking = new List<GameObject>();
 		List<GameObject> openList = new List<GameObject>();
-
-		neighboursForChecking.Add(tmpTile);
-
+		
+		neighboursForChecking.Add(tmpTileObj);
+		
 		for(int i = 0; i < possibleMoves; i++) {
 
 			foreach(GameObject g in neighboursForChecking) {
-				int curTileWidthInd = g.GetComponent<Tile>().WidthIndex;
-				int curTileHeightInd = g.GetComponent<Tile>().HeightIndex;
+				Tile tmpTile = g.GetComponent<Tile>();
 
-				//If width is odd, check above - if width is even, check below.
-				if(curTileWidthInd % 2 == 1) {
-					//Check above
-					if(!(curTileHeightInd - 1 < 0)) {
-						//Check top left
-						if(!(curTileWidthInd - 1 < 0)) {
-							int x = curTileWidthInd - 1, y = curTileHeightInd - 1;
-							ChangeSprite(x, y);
-							openList.Add(GridController.Instance.gridArray[curTileWidthInd - 1, curTileHeightInd - 1]);
-						}
-						
-						//Check top right
-						if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
-							int x = curTileWidthInd + 1, y = curTileHeightInd - 1;
-							ChangeSprite(x, y);
-							openList.Add(GridController.Instance.gridArray[curTileWidthInd + 1, curTileHeightInd - 1]);
-						}
+				for(int j = 0; j < tmpTile.NeighboursArray.Length; j++) {
+					if(tmpTile.NeighboursArray[j]) {
+						openList.Add(tmpTile.NeighboursArray[j]);
+						ChangeSprite(tmpTile.NeighboursArray[j]);
 					}
-
-				} else { 
-					//Check below
-					if(!(curTileHeightInd + 1 >= GridController.Instance.gridHeight)) {
-						//Check bot left
-						if(!(curTileWidthInd - 1 < 0)) {
-							int x = curTileWidthInd - 1, y = curTileHeightInd + 1;
-							ChangeSprite(x, y);
-							openList.Add(GridController.Instance.gridArray[x,y]);
-						}
-						
-						//Check bot right
-						if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
-							int x = curTileWidthInd + 1, y = curTileHeightInd + 1;
-							ChangeSprite(x, y);
-							openList.Add(GridController.Instance.gridArray[x,y]);
-						}
-					}
-				}
-
-				//Check neighbour left
-				if(!(curTileWidthInd - 1 < 0)) {
-					int x = curTileWidthInd - 1, y = curTileHeightInd;
-					ChangeSprite(x, y);
-					openList.Add(GridController.Instance.gridArray[x,y]);
-				}
-				
-				//Check neighbour right
-				if(!(curTileWidthInd + 1 >= GridController.Instance.gridWidth)) {
-					int x = curTileWidthInd + 1, y = curTileHeightInd;
-					ChangeSprite(x, y);
-					openList.Add(GridController.Instance.gridArray[x,y]);
 				}
 			}
 
 			neighboursForChecking.Clear();
-
+			
 			foreach(GameObject g in openList) {
 				neighboursForChecking.Add(g);
 			}
-
+			
 			openList.Clear();
 		}
 	}
 
-	void ChangeSprite(int x, int y) {
-		if(!GridController.Instance.gridArray[x,y].GetComponent<Tile>().occupied) {
-			GridController.Instance.gridArray[x,y].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[x,y].GetComponent<Tile>().spriteTileMove;
-			GridController.Instance.gridArray[x,y].GetComponent<Tile>().available = true;
+	void ChangeSprite (GameObject obj) {
+		if(!obj.GetComponent<Tile>().occupied) {
+			obj.GetComponent<SpriteRenderer>().sprite = obj.GetComponent<Tile>().spriteTileMove;
+			obj.GetComponent<Tile>().available = true;
 		}
 	}
-	
+
 	//To reset grid if unit is deselected
 	void ClearGrid() {
 		for(int i = 0; i < GridController.Instance.gridWidth; i++) {
@@ -308,7 +263,7 @@ public class PlayerController : MonoBehaviour {
 	}
 	
 
-	//Change the sprite showing which tiles can be used - Old fucker, for normal view, not ISO
+	//Change the sprite showing which tiles can be used - ********Old fucker*********, for normal view, not ISO
 	//	void ShowPossibleTiles(int possibleMoves) {
 	//		
 	//		//Finding the tile the current unit is standing on

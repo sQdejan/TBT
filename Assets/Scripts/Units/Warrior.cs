@@ -6,28 +6,20 @@ public class Warrior : Unit {
 
 	public override bool IsAttackPossible (GameObject obj) {
 
-		int attackRange = possibleMoves + 2;
-		Tile thisUnitTile = CurTile.GetComponent<Tile>();
-		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
-
-		int thisWidthIndex = thisUnitTile.WidthIndex;
-		int thisHeightIndex = thisUnitTile.HeightIndex;
-
-		int enemyWidthIndex = enemyUnitTile.WidthIndex;
-		int enemyHeightIndex = enemyUnitTile.HeightIndex;
-
-		//I have to do 2.5 checks:
-		//1. Standin next to it so unit can attack
-		//2.1 If within walking distance so I can walk and attack
-		//2.2 and also if any tile available around it
-		if(Mathf.Abs(thisWidthIndex - enemyWidthIndex) <= 1 && Mathf.Abs(thisHeightIndex - enemyHeightIndex) <= 1) {
+		//I have to do two checks:
+		//1. If already within range then it is possible
+		//2. If any of the nearest tiles are available then an attack is possible
+		if(Vector3.Distance(obj.transform.position, transform.position) < 1.71f) {
 			return true;
 		}
 
-		GameObject closestTile = ClosestTile(obj, thisWidthIndex, thisHeightIndex);
+		GameObject closestTile = ClosestTile(obj);
 
 		//I want to mark which tile will be moved to if an attack is possible
-		if((Mathf.Abs(enemyWidthIndex - (thisWidthIndex + thisHeightIndex - enemyHeightIndex)) <= attackRange && Mathf.Abs(enemyHeightIndex - (thisHeightIndex - thisWidthIndex + enemyWidthIndex)) <= attackRange) && closestTile) {
+		if(closestTile) {
+			if(attackMoveTile) {
+				attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteTileMove;
+			}
 			attackMoveTile = closestTile;
 			attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteMoveTo;
 			return true;
@@ -38,46 +30,36 @@ public class Warrior : Unit {
 
 	protected override void Attack (GameObject obj) {
 
-		Tile thisUnitTile = CurTile.GetComponent<Tile>();
-		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
-		
-		int thisWidthIndex = thisUnitTile.WidthIndex;
-		int thisHeightIndex = thisUnitTile.HeightIndex;
-		
-		int enemyWidthIndex = enemyUnitTile.WidthIndex;
-		int enemyHeightIndex = enemyUnitTile.HeightIndex;
-
 		//First I have to check if I am within range to attack, for warrior the range is one
-		if(Mathf.Abs(thisWidthIndex - enemyWidthIndex) <= 1 && Mathf.Abs(thisHeightIndex - enemyHeightIndex) <= 1) {
+		if(Vector3.Distance(obj.transform.position, transform.position) < 1.71f) {
 			obj.GetComponent<Unit>().TakeDamage(damage);
 			return;
 		} 
 
 		//Else I have to move the unit in order to attack.
 		//To do that, find the closest possible tile to move to
-		Move (ClosestTile(obj, thisWidthIndex, thisHeightIndex));
+		Move (attackMoveTile);
 	}
 
 	public override void TakeDamage (int damage) {
 		health -= damage;
 	}
 
-	GameObject ClosestTile(GameObject obj, int widthIndex, int heightIndex) {
+	GameObject ClosestTile(GameObject obj) {
 
 		List<GameObject> listGameobject = AvailableTiles(obj);
 
 		if(listGameobject.Count == 0) 
 			return null;
 
-		int shortestDistance = int.MaxValue;
+		float shortestDistance = float.MaxValue;
 		GameObject shortestDistanceObj = null;
-		
+
+		//Just looking at the distance to the mouse
 		foreach(GameObject o in listGameobject) {
-			int oWidth = o.GetComponent<Tile>().WidthIndex;
-			int oHeight = o.GetComponent<Tile>().HeightIndex;
-			
-			int tmpValue = Mathf.Abs(widthIndex - oWidth) + Mathf.Abs(heightIndex - oHeight);
-			
+				
+			float tmpValue = Vector2.Distance(o.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
 			if(tmpValue < shortestDistance) {
 				shortestDistance = tmpValue;
 				shortestDistanceObj = o;
@@ -92,25 +74,38 @@ public class Warrior : Unit {
 		List<GameObject> returnList = new List<GameObject>();
 		
 		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
-		
-		int enemyWidthIndex = enemyUnitTile.WidthIndex;
-		int enemyHeightIndex = enemyUnitTile.HeightIndex;
 
-		for(int i = -1; i <= 1; i++) {
-			for(int j = -1; j <= 1; j++) {
-				int x = enemyWidthIndex + i;
-				if(x < 0 || x >= GridController.Instance.gridWidth)
-					continue;
-				
-				int y = enemyHeightIndex + j;
-				if(y < 0 || y >= GridController.Instance.gridHeight)
-					continue;
-				
-				if(GridController.Instance.gridArray[x,y].GetComponent<Tile>().available) 
-					returnList.Add(GridController.Instance.gridArray[x,y]);
+		for(int i = 0; i < enemyUnitTile.NeighboursArray.Length; i++) {
+			if(enemyUnitTile.NeighboursArray[i]) {
+
+				Tile tmpTile = enemyUnitTile.NeighboursArray[i].GetComponent<Tile>();
+
+				if(tmpTile.available) {
+					returnList.Add(enemyUnitTile.NeighboursArray[i]);
+				}
+
+				if(i % 2 == 0) {
+					if(tmpTile.neighbourUpRight) 
+						if(tmpTile.neighbourUpRight.GetComponent<Tile>().available) 
+							returnList.Add(tmpTile.neighbourUpRight);
+
+					if(tmpTile.neighbourDownLeft) 
+						if(tmpTile.neighbourDownLeft.GetComponent<Tile>().available) 
+							returnList.Add(tmpTile.neighbourDownLeft);
+				} else {
+					if(tmpTile.neighbourUpLeft) 
+						if(tmpTile.neighbourUpLeft.GetComponent<Tile>().available)
+							if(!returnList.Contains(tmpTile.neighbourUpLeft))
+								returnList.Add(tmpTile.neighbourUpLeft);
+					
+					if(tmpTile.neighbourDownRight) 
+						if(tmpTile.neighbourDownRight.GetComponent<Tile>().available)
+							if(!returnList.Contains(tmpTile.neighbourDownRight))
+								returnList.Add(tmpTile.neighbourDownRight);
+				}
 			}
 		}
-		
+
 		return returnList;
-	}
+	}	
 }

@@ -35,7 +35,6 @@ public class GridController : MonoBehaviour {
 	void Awake() {
 
 		GameObject[,] tmpArray = AddRowsToArray(); //For positions for the tiles
-
 		gridArray = new GameObject[gridWidth, gridHeight];
 
 		for(int i = 0; i < gridWidth; i++) {
@@ -46,9 +45,69 @@ public class GridController : MonoBehaviour {
 			}
 		}
 
+		AssignNeighbours();
 	}
 
-	//Adding the rows to an temporary array in order to place the tiles
+	//Assign their "true" neighbours according to ISO view.
+	//Just for helping other functions.
+	void AssignNeighbours() {
+
+		for(int i = 0; i < gridWidth; i++) {
+			for(int j = 0; j < gridHeight; j++) {
+				
+				//If odd width
+				if(i % 2 == 1) {
+					//top left
+					int x = i - 1, y = j - 1;
+					if(x >= 0 && y >= 0)
+						gridArray[i,j].GetComponent<Tile>().neighbourUpLeft = gridArray[x,y];
+					
+					//top right
+					x = i + 1;
+					if(x < gridWidth && y >= 0) 
+						gridArray[i,j].GetComponent<Tile>().neighbourUpRight = gridArray[x,y];
+					
+					//bot left
+					x = i - 1;
+					y = j;
+					if(x >= 0) 
+						gridArray[i,j].GetComponent<Tile>().neighbourDownLeft = gridArray[x,y];
+					
+					//bot right
+					x = i + 1;
+					if(x < gridWidth)
+						gridArray[i,j].GetComponent<Tile>().neighbourDownRight = gridArray[x,y];
+					
+				} else { //If even
+					
+					//top left
+					int x = i - 1, y = j;
+					if(x >= 0)
+						gridArray[i,j].GetComponent<Tile>().neighbourUpLeft = gridArray[x,y];
+					
+					//top right
+					x = i + 1;
+					if(x < gridWidth) 
+						gridArray[i,j].GetComponent<Tile>().neighbourUpRight = gridArray[x,y];
+					
+					//bot left
+					x = i - 1;
+					y = j + 1;
+					if(y < gridHeight && x >= 0) 
+						gridArray[i,j].GetComponent<Tile>().neighbourDownLeft = gridArray[x,y];
+					
+					//bot right
+					x = i + 1;
+					if(y < gridHeight && x < gridWidth)
+						gridArray[i,j].GetComponent<Tile>().neighbourDownRight = gridArray[x,y];
+					
+				}
+			}
+		}
+	}
+
+	//Adding the rows to an temporary array in order to place the tiles.
+	//For easy setup.
 	GameObject[,] AddRowsToArray() {
 
 		int tmpHInd = -1;
