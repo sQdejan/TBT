@@ -32,17 +32,33 @@ public class Warrior : Unit {
 
 		//First I have to check if I am within range to attack, for warrior the range is one
 		if(Vector3.Distance(obj.transform.position, transform.position) < 1.71f) {
-			obj.GetComponent<Unit>().TakeDamage(damage);
+
+			if(GameFlow.Instance.resourcesLeft - resourcesForAttack >= 0) {
+				GameFlow.Instance.resourcesLeft -= resourcesForAttack;
+				GameFlow.Instance.UpdateResourceText();
+				obj.GetComponent<Unit>().TakeDamage(damage);
+			} else {
+				Debug.Log("Should give the player a warning");
+			}
+
 			return;
 		} 
 
 		//Else I have to move the unit in order to attack.
-		//To do that, find the closest possible tile to move to
-		Move (attackMoveTile);
+		if(GameFlow.Instance.resourcesLeft - resourcesForAttack - resourcesForMove >= 0) {
+			GameFlow.Instance.resourcesLeft -= resourcesForAttack;
+			GameFlow.Instance.UpdateResourceText();
+			obj.GetComponent<Unit>().TakeDamage(damage);
+			Move (attackMoveTile);
+		} else {
+			Debug.Log("Should give the player a warning");
+		}
 	}
 
 	public override void TakeDamage (int damage) {
 		health -= damage;
+
+		Debug.Log("Took damage, auch!");
 	}
 
 	GameObject ClosestTile(GameObject obj) {

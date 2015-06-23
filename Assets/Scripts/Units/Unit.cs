@@ -54,13 +54,22 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	protected void Move(GameObject nextTile) {
-		curTile.GetComponent<Tile>().occupied = false;
-		curTile.GetComponent<Tile>().available = true;
 
-		transform.position = nextTile.transform.position;
-		curTile = nextTile;
-		curTile.GetComponent<Tile>().occupied = true;
-		curTile.GetComponent<Tile>().available = false;
+		if(GameFlow.Instance.resourcesLeft - resourcesForMove >= 0) {
+
+			GameFlow.Instance.resourcesLeft -= resourcesForMove;
+			GameFlow.Instance.UpdateResourceText();
+
+			curTile.GetComponent<Tile>().occupied = false;
+			curTile.GetComponent<Tile>().available = true;
+
+			transform.position = nextTile.transform.position;
+			curTile = nextTile;
+			curTile.GetComponent<Tile>().occupied = true;
+			curTile.GetComponent<Tile>().available = false;
+		} else {
+			Debug.Log("Should give the player a warning");
+		}
 	}
 
 	protected void Death() {
