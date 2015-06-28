@@ -31,7 +31,7 @@ public class GameFlow : MonoBehaviour {
 	private Text resourceDisplayText;
 	private bool playersCurrentTurn = true;
 
-	void Start() {
+	void Awake() {
 		resourceDisplayText = resourceDisplay.GetComponent<Text>();
 		originalText = resourceDisplayText.text;
 		resourceDisplayText.text += " " + resourcesLeft;

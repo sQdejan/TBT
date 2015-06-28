@@ -12,7 +12,6 @@ public class Tile : MonoBehaviour {
 
 	public GameObject neighbourUpLeft, neighbourUpRight, neighbourDownLeft, neighbourDownRight;
 
-	private int heightIndex, widthIndex;
 	private GameObject[] neighboursArray;
 
 	void Start() {
@@ -21,18 +20,6 @@ public class Tile : MonoBehaviour {
 
 	#region Properties
 
-	public int HeightIndex {
-		get {
-			return heightIndex;
-		}
-	}
-
-	public int WidthIndex {
-		get {
-			return widthIndex;
-		}
-	}
-
 	public GameObject[] NeighboursArray {
 		get {
 			return neighboursArray;
@@ -40,11 +27,5 @@ public class Tile : MonoBehaviour {
 	}
 
 	#endregion
-
-	public void SetHeightWidthIndex(int heightInd, int widthInd) {
-		heightIndex = heightInd;
-		widthIndex = widthInd;
-	}
-
 
 }

@@ -46,10 +46,15 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\AI\AIController.cs" />
+     <Compile Include="Assets\Scripts\AI\AIGridController.cs" />
+     <Compile Include="Assets\Scripts\AI\MCTS.cs" />
+     <Compile Include="Assets\Scripts\AI\MCTSNode.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GameFlow.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GridController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\Tile.cs" />
+     <Compile Include="Assets\Scripts\Testing\UnitTest.cs" />
      <Compile Include="Assets\Scripts\Units\Unit.cs" />
      <Compile Include="Assets\Scripts\Units\Warrior.cs" />
      <None Include="Assets\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />

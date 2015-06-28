@@ -40,7 +40,7 @@ public class GridController : MonoBehaviour {
 		for(int i = 0; i < gridWidth; i++) {
 			for(int j = 0; j < gridHeight; j++) {
 				gridArray[i,j] = (GameObject)Instantiate(gridPrefab, tmpArray[i,j].transform.position + Vector3.up * 0.6f, Quaternion.identity);
-				gridArray[i,j].GetComponent<Tile>().SetHeightWidthIndex(j, i);
+//				gridArray[i,j].GetComponent<Tile>().SetHeightWidthIndex(j, i);
 				gridArray[i,j].transform.parent = gridParent.transform;
 			}
 		}
