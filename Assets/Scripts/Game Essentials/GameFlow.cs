@@ -21,15 +21,17 @@ public class GameFlow : MonoBehaviour {
 #endregion
 
 	public GameObject resourceDisplay;
+	public GameObject endTurnButton;
 	public int amountOfResourcesPerTurn = 10;
 	public bool playerWillStart = true;
 
 	[HideInInspector]
 	public int resourcesLeft = 10;
 
-	private string originalText;
+	public static bool playersCurrentTurn = true;
+
 	private Text resourceDisplayText;
-	private bool playersCurrentTurn = true;
+	private string originalText;
 
 	void Awake() {
 		resourceDisplayText = resourceDisplay.GetComponent<Text>();
@@ -44,12 +46,22 @@ public class GameFlow : MonoBehaviour {
 		playersCurrentTurn = !playersCurrentTurn;
 
 		if(playersCurrentTurn) {
+			endTurnButton.GetComponent<Button>().interactable = true;
 			resourcesLeft = amountOfResourcesPerTurn;
 			UpdateResourceText();
 			Debug.Log("Player's turn");
 		} else {
+			endTurnButton.GetComponent<Button>().interactable = false;
+			StartCoroutine(Testing());
 			Debug.Log("AI's turn");
 		}
+	}
+
+	//Remember to delete
+	IEnumerator Testing() {
+		yield return new WaitForSeconds(5f);
+
+		EndTurn();
 	}
 
 	public void UpdateResourceText() {

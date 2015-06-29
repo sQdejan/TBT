@@ -6,6 +6,7 @@ public delegate void PerformAction(GameObject obj);
 public abstract class Unit : MonoBehaviour {
 
 	public int possibleMoves;
+	public int attackRange;
 	public int health;
 	public int damage;
 	public int resourcesForAttack;

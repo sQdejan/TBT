@@ -9,19 +9,27 @@ public class Warrior : Unit {
 		//I have to do two checks:
 		//1. If already within range then it is possible
 		//2. If any of the nearest tiles are available then an attack is possible
-		if(Vector3.Distance(obj.transform.position, transform.position) < 1.71f) {
+
+		//1.
+		int enemyHeight = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().HeightIndex;
+		int enemyWidth = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().WidthIndex;
+
+		int thisHeight = CurTile.GetComponent<Tile>().HeightIndex;
+		int thisWidth = CurTile.GetComponent<Tile>().WidthIndex;
+
+		if(Mathf.Abs(enemyHeight - thisHeight) <= attackRange && Mathf.Abs(enemyWidth - thisWidth) <= attackRange) {
 			return true;
 		}
-
+		//2.
 		GameObject closestTile = ClosestTile(obj);
 
 		//I want to mark which tile will be moved to if an attack is possible
 		if(closestTile) {
 			if(attackMoveTile) {
-				attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteTileMove;
+				attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteTilePossibleMove;
 			}
 			attackMoveTile = closestTile;
-			attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteMoveTo;
+			attackMoveTile.GetComponent<SpriteRenderer>().sprite = attackMoveTile.GetComponent<Tile>().spriteAttackMove;
 			return true;
 		}
 
@@ -91,33 +99,21 @@ public class Warrior : Unit {
 		
 		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
 
-		for(int i = 0; i < enemyUnitTile.NeighboursArray.Length; i++) {
-			if(enemyUnitTile.NeighboursArray[i]) {
+		int tmpHeight = enemyUnitTile.HeightIndex;
+		int tmpWidth = enemyUnitTile.WidthIndex;
 
-				Tile tmpTile = enemyUnitTile.NeighboursArray[i].GetComponent<Tile>();
+		for(int i = -attackRange; i <= attackRange; i++) {
+			int y = tmpHeight + i;
 
-				if(tmpTile.available) {
-					returnList.Add(enemyUnitTile.NeighboursArray[i]);
-				}
+			if(y >= 0 && y < GridController.Instance.gridHeight) {
+				for(int j = -attackRange; j <= attackRange; j++) {
+					int x = tmpWidth + j;
 
-				if(i % 2 == 0) {
-					if(tmpTile.neighbourUpRight) 
-						if(tmpTile.neighbourUpRight.GetComponent<Tile>().available) 
-							returnList.Add(tmpTile.neighbourUpRight);
-
-					if(tmpTile.neighbourDownLeft) 
-						if(tmpTile.neighbourDownLeft.GetComponent<Tile>().available) 
-							returnList.Add(tmpTile.neighbourDownLeft);
-				} else {
-					if(tmpTile.neighbourUpLeft) 
-						if(tmpTile.neighbourUpLeft.GetComponent<Tile>().available)
-							if(!returnList.Contains(tmpTile.neighbourUpLeft))
-								returnList.Add(tmpTile.neighbourUpLeft);
-					
-					if(tmpTile.neighbourDownRight) 
-						if(tmpTile.neighbourDownRight.GetComponent<Tile>().available)
-							if(!returnList.Contains(tmpTile.neighbourDownRight))
-								returnList.Add(tmpTile.neighbourDownRight);
+					if(x >= 0 && x < GridController.Instance.gridWidth) {
+						if(GridController.Instance.tileArray[y,x].available) {
+							returnList.Add(GridController.Instance.gridArray[y,x]);
+						}
+					}
 				}
 			}
 		}

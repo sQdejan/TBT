@@ -4,28 +4,33 @@ using System.Collections;
 public class Tile : MonoBehaviour {
 
 	public Sprite spriteTileOriginal;
-	public Sprite spriteTileMove;
-	public Sprite spriteMoveTo;
+	public Sprite spriteTilePossibleMove;
+	public Sprite spriteAttackMove;
 
 	[HideInInspector] public bool occupied = false;
 	[HideInInspector] public bool available = false;
 
-	public GameObject neighbourUpLeft, neighbourUpRight, neighbourDownLeft, neighbourDownRight;
-
-	private GameObject[] neighboursArray;
-
-	void Start() {
-		neighboursArray = new GameObject[] {neighbourUpLeft, neighbourUpRight, neighbourDownRight, neighbourDownLeft};
-	} 
+	private int heightIndex, widthIndex;
 
 	#region Properties
 
-	public GameObject[] NeighboursArray {
+	public int HeightIndex {
 		get {
-			return neighboursArray;
+			return heightIndex;
+		}
+	}
+
+	public int WidthIndex {
+		get {
+			return widthIndex;
 		}
 	}
 
 	#endregion
+
+	public void SetHeightWidthIndex(int h, int w) {
+		heightIndex = h;
+		widthIndex = w;
+	}
 
 }

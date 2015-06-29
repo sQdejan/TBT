@@ -46,8 +46,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\AI\AIController.cs" />
-     <Compile Include="Assets\Scripts\AI\AIGridController.cs" />
      <Compile Include="Assets\Scripts\AI\MCTS.cs" />
      <Compile Include="Assets\Scripts\AI\MCTSNode.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GameFlow.cs" />
