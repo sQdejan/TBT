@@ -237,7 +237,7 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-
+	//This function is public to be used when the "end turn" button is pressed
 	public void Reset() {
 
 		tookAction = false;

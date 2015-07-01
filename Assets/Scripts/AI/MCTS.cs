@@ -21,7 +21,8 @@ public class MCTS : MonoBehaviour {
 
 	MCTSNode rootNode;
 
-	public void TakeTurn() {
+	public void FindMoves(MCTSNode node) {
+		rootNode = node;
 
 	}
 

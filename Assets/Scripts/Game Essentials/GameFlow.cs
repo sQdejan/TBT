@@ -34,10 +34,10 @@ public class GameFlow : MonoBehaviour {
 	private string originalText;
 
 	void Awake() {
+		resourcesLeft = amountOfResourcesPerTurn;
 		resourceDisplayText = resourceDisplay.GetComponent<Text>();
 		originalText = resourceDisplayText.text;
 		resourceDisplayText.text += " " + resourcesLeft;
-
 	}
 
 	public void EndTurn() {

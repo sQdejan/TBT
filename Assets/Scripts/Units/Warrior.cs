@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Warrior : Unit {
+public class Warrior : PlayableCharacter {
 
 	public override bool IsAttackPossible (GameObject obj) {
 
@@ -14,12 +14,13 @@ public class Warrior : Unit {
 		int enemyHeight = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().HeightIndex;
 		int enemyWidth = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().WidthIndex;
 
-		int thisHeight = CurTile.GetComponent<Tile>().HeightIndex;
-		int thisWidth = CurTile.GetComponent<Tile>().WidthIndex;
+		int thisHeight = curTile.GetComponent<Tile>().HeightIndex;
+		int thisWidth = curTile.GetComponent<Tile>().WidthIndex;
 
 		if(Mathf.Abs(enemyHeight - thisHeight) <= attackRange && Mathf.Abs(enemyWidth - thisWidth) <= attackRange) {
 			return true;
 		}
+
 		//2.
 		GameObject closestTile = ClosestTile(obj);
 
@@ -38,8 +39,14 @@ public class Warrior : Unit {
 
 	protected override void Attack (GameObject obj) {
 
-		//First I have to check if I am within range to attack, for warrior the range is one
-		if(Vector3.Distance(obj.transform.position, transform.position) < 1.71f) {
+		//Am I within attack range?
+		int enemyHeight = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().HeightIndex;
+		int enemyWidth = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().WidthIndex;
+		
+		int thisHeight = curTile.GetComponent<Tile>().HeightIndex;
+		int thisWidth = curTile.GetComponent<Tile>().WidthIndex;
+
+		if(Mathf.Abs(enemyHeight - thisHeight) <= attackRange && Mathf.Abs(enemyWidth - thisWidth) <= attackRange) {
 
 			if(GameFlow.Instance.resourcesLeft - resourcesForAttack >= 0) {
 				GameFlow.Instance.resourcesLeft -= resourcesForAttack;
@@ -55,9 +62,8 @@ public class Warrior : Unit {
 		//Else I have to move the unit in order to attack.
 		if(GameFlow.Instance.resourcesLeft - resourcesForAttack - resourcesForMove >= 0) {
 			GameFlow.Instance.resourcesLeft -= resourcesForAttack;
-			GameFlow.Instance.UpdateResourceText();
-			obj.GetComponent<Unit>().TakeDamage(damage);
 			Move (attackMoveTile);
+			obj.GetComponent<Unit>().TakeDamage(damage);
 		} else {
 			Debug.Log("Should give the player a warning");
 		}

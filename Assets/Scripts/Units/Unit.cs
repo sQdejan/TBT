@@ -22,14 +22,16 @@ public abstract class Unit : MonoBehaviour {
 	public static GameObject attackMoveTile;
 
 	//I need this in order to reset it's stats once a Unit is moving
-	private GameObject curTile;
-	
+	protected GameObject curTile;
+
 	#region Methods to be overridden
 
 	public abstract bool IsAttackPossible(GameObject obj);
 	public abstract void TakeDamage(int damage);
 
 	protected abstract void Attack(GameObject obj);
+	protected abstract void Move(GameObject nextTile);
+	protected abstract void Death();
 
 	#endregion
 
@@ -44,6 +46,7 @@ public abstract class Unit : MonoBehaviour {
 	#endregion
 
 	void Start() {
+
 		//Make the start tile occupied
 		LayerMask tileLayer = 1 << LayerMask.NameToLayer("Tile");
 		RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.zero, 0, tileLayer);
@@ -54,29 +57,6 @@ public abstract class Unit : MonoBehaviour {
 		}
 	}
 
-	protected void Move(GameObject nextTile) {
-
-		if(GameFlow.Instance.resourcesLeft - resourcesForMove >= 0) {
-
-			GameFlow.Instance.resourcesLeft -= resourcesForMove;
-			GameFlow.Instance.UpdateResourceText();
-
-			curTile.GetComponent<Tile>().occupied = false;
-			curTile.GetComponent<Tile>().available = true;
-
-			transform.position = nextTile.transform.position;
-			curTile = nextTile;
-			curTile.GetComponent<Tile>().occupied = true;
-			curTile.GetComponent<Tile>().available = false;
-		} else {
-			Debug.Log("Should give the player a warning");
-		}
-	}
-
-	protected void Death() {
-		Debug.Log("Death");
-	}
-	
 	//I need the two following methods for automatically
 	//setting the two "standard" possibilities.
 	public void SetAttackAsAction() {
