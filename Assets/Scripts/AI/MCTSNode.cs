@@ -2,24 +2,30 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum Action{ATTACK, MOVE};
+
 public class MCTSNode {
 
 	public MCTSNode parent = null;
 
-	public GameObject unitUsed;
-	public GameObject moveAction;
-	public GameObject enemyAttacked;
+	//The action it takes to get to THIS node
+	public Action action;
 
-	public int currentDepth;
+	//Where in the array will action happen?
+	public GameStateUnit gsUnit;
 
-	public List<MCTSNode> children = new List<MCTSNode>();
+	//To traverse the tree and also see if a node is fully expanded
+	public List<MCTSNode> children;
+	public int curChildIndex = 0;
 
-	public MCTSNode(MCTSNode parent, GameObject unitUsed, GameObject moveAction, GameObject enemyAttacked, int currentDepth) {
+	//For the statistics
+	public int timeVisited;
+	public int reward;
+
+	public MCTSNode(MCTSNode parent, Action action, GameStateUnit gsUnit) {
 		this.parent = parent;
-		this.unitUsed = unitUsed;
-		this.moveAction = moveAction;
-		this.enemyAttacked = enemyAttacked;
-		this.currentDepth = currentDepth;
+		this.action = action;
+		this.gsUnit = gsUnit;
 	}
 
 }

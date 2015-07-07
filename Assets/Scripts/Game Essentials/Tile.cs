@@ -10,6 +10,8 @@ public class Tile : MonoBehaviour {
 	[HideInInspector] public bool occupied = false;
 	[HideInInspector] public bool available = false;
 
+	[HideInInspector] public GameObject occupier = null;
+
 	private int heightIndex, widthIndex;
 
 	#region Properties

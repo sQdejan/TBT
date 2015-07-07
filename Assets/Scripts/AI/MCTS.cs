@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System;
 
 public class MCTS : MonoBehaviour {
 
@@ -19,43 +22,58 @@ public class MCTS : MonoBehaviour {
 	
 #endregion
 
-	MCTSNode rootNode;
-
-	public void FindMoves(MCTSNode node) {
-		rootNode = node;
-
+	void Start() {
+		instance = this;
 	}
 
-	void TreePolicy() {
+	public GameStateUnit[,] gameState;
 
+	MCTSNode rootNode;
+	MCTSNode currentNode;
+
+	public void GetMove(MCTSNode node) {
+		rootNode = node;
+
+		//A while loop will run here
+		TreePolicy();
+	}
+
+	//VERY IMPORTANT: remember to update the TURNORDERLIST item each time a move is happening
+	void TreePolicy() {
+		gameState = AIGameFlow.Instance.GetCopyOfGameState();
+		currentNode = rootNode;
+		rootNode.children = AIGameFlow.activegsUnit.occupier.GetPossibleMoves(rootNode);
+		AIGameFlow.activegsUnit.occupier.Move(rootNode.children[0].gsUnit);
+
+
+//		AIGameFlow.PrintGameState(gameState);
+//		gameState[0,5].occupier.Move(gameState[2,5]);
+//		UnityEngine.Debug.Log("-----");
+//		AIGameFlow.PrintGameState(gameState);
 	}
 
 	void BestChild() {
-
 	}
 
 	void Expand() {
-
 	}
 
-	void FullyExpanded() {
-
+	bool FullyExpanded(MCTSNode node) {
+		return false;
 	}
 
-	void UntriedAction() {
-
+	void NextUntriedAction(MCTSNode node) {
 	}
 
-	void DefaultPolicy() {
-
+	float DefaultPolicy() {
+		return 0;
 	}
 
-	void UCTValue() {
-
+	float UCTValue() {
+		return 0;
 	}
 
-	void BackPropagate() {
-
+	void BackPropagate(float reward) {
 	}
 
 }

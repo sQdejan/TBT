@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Warrior : PlayableCharacter {
+public class Warrior : Unit {
 
 	public override bool IsAttackPossible (GameObject obj) {
 
@@ -11,8 +11,8 @@ public class Warrior : PlayableCharacter {
 		//2. If any of the nearest tiles are available then an attack is possible
 
 		//1.
-		int enemyHeight = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().HeightIndex;
-		int enemyWidth = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().WidthIndex;
+		int enemyHeight = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().HeightIndex;
+		int enemyWidth = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().WidthIndex;
 
 		int thisHeight = curTile.GetComponent<Tile>().HeightIndex;
 		int thisWidth = curTile.GetComponent<Tile>().WidthIndex;
@@ -40,37 +40,27 @@ public class Warrior : PlayableCharacter {
 	protected override void Attack (GameObject obj) {
 
 		//Am I within attack range?
-		int enemyHeight = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().HeightIndex;
-		int enemyWidth = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>().WidthIndex;
+		int enemyHeight = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().HeightIndex;
+		int enemyWidth = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().WidthIndex;
 		
 		int thisHeight = curTile.GetComponent<Tile>().HeightIndex;
 		int thisWidth = curTile.GetComponent<Tile>().WidthIndex;
 
 		if(Mathf.Abs(enemyHeight - thisHeight) <= attackRange && Mathf.Abs(enemyWidth - thisWidth) <= attackRange) {
-
-			if(GameFlow.Instance.resourcesLeft - resourcesForAttack >= 0) {
-				GameFlow.Instance.resourcesLeft -= resourcesForAttack;
-				GameFlow.Instance.UpdateResourceText();
-				obj.GetComponent<Unit>().TakeDamage(damage);
-			} else {
-				Debug.Log("Should give the player a warning");
-			}
-
+			obj.GetComponent<Unit>().TakeDamage(damage);
 			return;
 		} 
 
 		//Else I have to move the unit in order to attack.
-		if(GameFlow.Instance.resourcesLeft - resourcesForAttack - resourcesForMove >= 0) {
-			GameFlow.Instance.resourcesLeft -= resourcesForAttack;
-			Move (attackMoveTile);
-			obj.GetComponent<Unit>().TakeDamage(damage);
-		} else {
-			Debug.Log("Should give the player a warning");
-		}
+		Move (attackMoveTile);
+		obj.GetComponent<Unit>().TakeDamage(damage);
 	}
 
 	public override void TakeDamage (int damage) {
 		health -= damage;
+
+		if(health <= 0)
+			Death();
 
 		Debug.Log("Took damage, auch!");
 	}
@@ -103,7 +93,7 @@ public class Warrior : PlayableCharacter {
 		
 		List<GameObject> returnList = new List<GameObject>();
 		
-		Tile enemyUnitTile = obj.GetComponent<Unit>().CurTile.GetComponent<Tile>();
+		Tile enemyUnitTile = obj.GetComponent<Unit>().curTile.GetComponent<Tile>();
 
 		int tmpHeight = enemyUnitTile.HeightIndex;
 		int tmpWidth = enemyUnitTile.WidthIndex;

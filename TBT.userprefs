@@ -1,12 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AIUnit/AICharacter.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AI/MCTS.cs">
     <Files>
-      <File FileName="Assets/Scripts/AI/MCTSNode.cs" Line="18" Column="38" />
-      <File FileName="Assets/Scripts/AI/AIController.cs" Line="22" Column="1" />
-      <File FileName="Assets/Scripts/Units/Unit.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/AIUnit/AICharacter.cs" Line="19" Column="19" />
-      <File FileName="Assets/Scripts/Units/PlayableCharacter.cs" Line="28" Column="35" />
+      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="170" Column="22" />
+      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="45" Column="53" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

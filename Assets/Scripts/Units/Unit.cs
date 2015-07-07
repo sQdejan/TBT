@@ -1,16 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public delegate void PerformAction(GameObject obj);
+public enum ClassType {WARRIOR, RANGED};
 
 public abstract class Unit : MonoBehaviour {
+
+	public ClassType classType;
 
 	public int possibleMoves;
 	public int attackRange;
 	public int health;
 	public int damage;
-	public int resourcesForAttack;
-	public int resourcesForMove;
 
 	public Sprite originalSprite;
 	public Sprite hoverSprite;
@@ -22,7 +24,7 @@ public abstract class Unit : MonoBehaviour {
 	public static GameObject attackMoveTile;
 
 	//I need this in order to reset it's stats once a Unit is moving
-	protected GameObject curTile;
+	[HideInInspector] public GameObject curTile;
 
 	#region Methods to be overridden
 
@@ -30,18 +32,6 @@ public abstract class Unit : MonoBehaviour {
 	public abstract void TakeDamage(int damage);
 
 	protected abstract void Attack(GameObject obj);
-	protected abstract void Move(GameObject nextTile);
-	protected abstract void Death();
-
-	#endregion
-
-	#region Properties
-
-	public GameObject CurTile {
-		get {
-			return curTile;
-		}
-	}
 
 	#endregion
 
@@ -54,7 +44,30 @@ public abstract class Unit : MonoBehaviour {
 			curTile = hit.collider.gameObject;
 			curTile.GetComponent<Tile>().occupied = true;
 			curTile.GetComponent<Tile>().available = false;
+			curTile.GetComponent<Tile>().occupier = gameObject;
 		}
+	}
+
+	//Shared and implemented functionality for Move and Death
+	protected void Move (GameObject nextTile) {
+		
+		curTile.GetComponent<Tile>().occupied = false;
+		curTile.GetComponent<Tile>().available = true;
+		curTile.GetComponent<Tile>().occupier = null;
+		
+		transform.position = nextTile.transform.position;
+		curTile = nextTile;
+
+		curTile.GetComponent<Tile>().occupied = true;
+		curTile.GetComponent<Tile>().available = false;
+		curTile.GetComponent<Tile>().occupier = gameObject;
+	}
+	
+	//Remember to announce somewhere that I died
+	protected void Death () {
+		GameFlow.Instance.KillUnit(gameObject);
+		curTile.GetComponent<Tile>().occupied = false;
+		gameObject.SetActive(false);
 	}
 
 	//I need the two following methods for automatically
