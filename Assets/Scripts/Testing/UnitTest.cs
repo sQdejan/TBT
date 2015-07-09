@@ -33,8 +33,8 @@ public class UnitTest : MonoBehaviour {
 	}
 
 	void ThreadFunction() {
-
-
+		System.Random r = new System.Random();
+		UnityEngine.Debug.Log(r.Next(5,10));
 //		Stopwatch sw = new Stopwatch();
 //		sw.Start();
 //		for(int i = 0; i < int.MaxValue; i++) {
@@ -48,6 +48,8 @@ public class UnitTest : MonoBehaviour {
 //		                                   ts.Milliseconds);
 
 //		finished = true;
+
+		UnityEngine.Debug.Log("Success");
 	}
 
 

@@ -17,7 +17,7 @@ public abstract class AIUnit {
 	#region Methods to be overridden
 	
 	public abstract void TakeDamage(int damage);
-	public abstract void Attack(GameStateUnit to);
+	public abstract void Attack(GameStateUnit moveTo, GameStateUnit attack);
 	public abstract List<MCTSNode> GetPossibleMoves(MCTSNode parent);
 	public abstract AIUnit Copy(GameStateUnit unit);
 
@@ -35,6 +35,7 @@ public abstract class AIUnit {
 	
 	//Remember to announce somewhere that I died
 	protected void Death (int h, int w) {
+
 	}
 
 

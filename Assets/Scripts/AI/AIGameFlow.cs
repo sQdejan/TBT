@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class AIGameFlow : MonoBehaviour {
 
@@ -27,21 +28,35 @@ public class AIGameFlow : MonoBehaviour {
 
 	[HideInInspector] public int height, width;
 
-	public static GameStateUnit activegsUnit;
+	public static AIUnit activeUnit;
+	public static bool finished = false;
+//	public static int lol = 0;
 
-	public List<GameStateUnit> turnOrderList;
+	public List<AIUnit> turnOrderList;
 	public int curTurnOrderIndex;
 	
-	private GameStateUnit[,] gameState;
-	private GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list below
+	GameStateUnit[,] gameState;
+	GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list below
 
-	#region Setup related
+	Thread MCTSThread;
 
 	void Start() {
 		instance = this;
 	}
 
+//	void Update() {
+//		if(!finished)
+//			return;
+//
+//		Debug.Log("I am done = " + lol);
+//		finished = false;
+//	}
+
+	#region Setup related
+
+	//Initialise the current game state and prepare for MCTS
 	void SetupGameState() {
+
 		height = GridController.Instance.gridHeight;
 		width = GridController.Instance.gridWidth;
 
@@ -78,7 +93,10 @@ public class AIGameFlow : MonoBehaviour {
 			}
 		}
 
-		MCTS.Instance.GetMove(new MCTSNode(null, Action.ATTACK, null));
+		MCTS.Instance.StartProcess();
+
+//		MCTSThread = new Thread(MCTS.Instance.StartProcess);
+//		MCTSThread.Start();
 	}
 
 	void CopyStats(Unit from, AIUnit to) {
@@ -102,15 +120,15 @@ public class AIGameFlow : MonoBehaviour {
 		if(++curTurnOrderIndex >= turnOrderList.Count)
 			curTurnOrderIndex = 0;
 
-		activegsUnit = turnOrderList[curTurnOrderIndex];
+		activeUnit = turnOrderList[curTurnOrderIndex];
 
 		return isGameOver;
 	}
 
-	public void KillUnit(GameStateUnit gs) {
-		gs.state = GS_EMPTY;
-		gs.occupier = null;
-		int tmpIndex = turnOrderList.IndexOf(gs);
+	public void KillUnit(AIUnit unit) {
+		unit.curgsUnit.state = GS_EMPTY;
+		unit.curgsUnit.occupier = null;
+		int tmpIndex = turnOrderList.IndexOf(unit);
 		
 		if(tmpIndex < curTurnOrderIndex)
 			curTurnOrderIndex--;
@@ -122,10 +140,10 @@ public class AIGameFlow : MonoBehaviour {
 		bool foundPlayer = false;
 		bool foundAI = false;
 
-		foreach(GameStateUnit gs in turnOrderList) {
-			if(gs.state == AIGameFlow.GS_PLAYER)
+		foreach(AIUnit u in turnOrderList) {
+			if(u.curgsUnit.state == AIGameFlow.GS_PLAYER)
 				foundPlayer = true;
-			else if(gs.state == AIGameFlow.GS_AI)
+			else if(u.curgsUnit.state == AIGameFlow.GS_AI)
 				foundAI = true;
 		}
 
@@ -162,9 +180,9 @@ public class AIGameFlow : MonoBehaviour {
 
 		//Resetting the turnOrderList
 		curTurnOrderIndex = GameFlow.Instance.CurTurnIndex - 1; //I need to subtract one because I increment right away
-		turnOrderList = new List<GameStateUnit>();
+		turnOrderList = new List<AIUnit>();
 		for(int i = 0; i < turnOrderArray.Length; i++) {
-			turnOrderList.Add(rArray[turnOrderArray[i].h, turnOrderArray[i].w]);
+			turnOrderList.Add(rArray[turnOrderArray[i].h, turnOrderArray[i].w].occupier);
 		}
 
 		//Start the process
@@ -195,15 +213,16 @@ public class AIGameFlow : MonoBehaviour {
 		}
 	}
 
-	public static void PrintUnits(GameStateUnit[,] gs, int h, int w) {
-		for(int i = 0; i < h; i++) {
-			for(int j = 0; j < w; j++) {
+	public static void PrintUnits(GameStateUnit[,] gs) {
+		for(int i = 0; i < gs.GetLength(0); i++) {
+			for(int j = 0; j < gs.GetLength(1); j++) {
 				if(gs[i,j].state == GS_AI || gs[i,j].state == GS_PLAYER) {
 					Debug.Log("Health " + gs[i,j].occupier.health);
 					Debug.Log("Possible Moves " + gs[i,j].occupier.possibleMoves);
 					Debug.Log("Attack range " + gs[i,j].occupier.attackRange);
 					Debug.Log("Damage " + gs[i,j].occupier.damage);
 					Debug.Log("Possible target " + gs[i,j].occupier.possibleTarget);
+					Debug.Log("----------------------");
 				}
 			}
 		}
@@ -223,7 +242,7 @@ public class AIGameFlow : MonoBehaviour {
 		}
 
 		if(GUI.Button(new Rect(300,0,100,20), "Units")) {
-			PrintUnits(gameState, height, width);
+			PrintUnits(gameState);
 		}
 	}
 
