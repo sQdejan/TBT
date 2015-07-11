@@ -16,7 +16,6 @@ public class AIWarrior : AIUnit {
 
 		if(health <= 0) {
 			AIGameFlow.Instance.KillUnit(this);
-			Debug.Log("I DEAD BOY");
 		}
 	}
 

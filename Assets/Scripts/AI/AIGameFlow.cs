@@ -30,7 +30,9 @@ public class AIGameFlow : MonoBehaviour {
 
 	public static AIUnit activeUnit;
 	public static bool finished = false;
-//	public static int lol = 0;
+	public static int cycles = 0;
+
+	public static MCTSNode move;
 
 	public List<AIUnit> turnOrderList;
 	public int curTurnOrderIndex;
@@ -44,18 +46,18 @@ public class AIGameFlow : MonoBehaviour {
 		instance = this;
 	}
 
-//	void Update() {
-//		if(!finished)
-//			return;
-//
-//		Debug.Log("I am done = " + lol);
-//		finished = false;
-//	}
+	void Update() {
+		if(!finished)
+			return;
+
+		GameFlow.Instance.MoveHasBeenCalculated();
+		finished = false;
+	}
 
 	#region Setup related
 
 	//Initialise the current game state and prepare for MCTS
-	void SetupGameState() {
+	public void SetupGameState() {
 
 		height = GridController.Instance.gridHeight;
 		width = GridController.Instance.gridWidth;
@@ -93,10 +95,10 @@ public class AIGameFlow : MonoBehaviour {
 			}
 		}
 
-		MCTS.Instance.StartProcess();
+//		MCTS.Instance.StartProcess();
 
-//		MCTSThread = new Thread(MCTS.Instance.StartProcess);
-//		MCTSThread.Start();
+		MCTSThread = new Thread(MCTS.Instance.StartProcess);
+		MCTSThread.Start();
 	}
 
 	void CopyStats(Unit from, AIUnit to) {
@@ -228,23 +230,28 @@ public class AIGameFlow : MonoBehaviour {
 		}
 	}
 
-	void OnGUI() {
-		if(GUI.Button(new Rect(0,0,100,20), "Setup")) {
-			SetupGameState();
-		}
-
-		if(GUI.Button(new Rect(100,0,100,20), "Start")) {
-//			StartProcess();
-		}
-
-		if(GUI.Button(new Rect(200,0,100,20), "Print gs")) {
-			PrintGameState(gameState);
-		}
-
-		if(GUI.Button(new Rect(300,0,100,20), "Units")) {
-			PrintUnits(gameState);
-		}
+	//If I reset the scene I abort the thread for good measures
+	public void AbortThread() {
+		MCTSThread.Abort();
 	}
+
+//	void OnGUI() {
+//		if(GUI.Button(new Rect(0,0,100,20), "Setup")) {
+////			SetupGameState();t
+//		}
+//
+//		if(GUI.Button(new Rect(100,0,100,20), "Start")) {
+//			MCTSThread.Abort();
+//		}
+//
+//		if(GUI.Button(new Rect(200,0,100,20), "Print gs")) {
+//			PrintGameState(gameState);
+//		}
+//
+//		if(GUI.Button(new Rect(300,0,100,20), "Units")) {
+//			PrintUnits(gameState);
+//		}
+//	}
 
 	#endregion
 }

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public delegate void PerformAction(GameObject obj);
 public enum ClassType {WARRIOR, RANGED};
 
 public abstract class Unit : MonoBehaviour {
@@ -17,8 +16,6 @@ public abstract class Unit : MonoBehaviour {
 	public Sprite originalSprite;
 	public Sprite hoverSprite;
 
-	public PerformAction CurrentAction; //To assign different methods depending on what should be called
-
 	//The tile that will be moved to, in order to attack. I need this variable in order to reset the sprite if not
 	//hovered above anymore. It can be static because only one unit will be active at any given time
 	public static GameObject attackMoveTile;
@@ -31,7 +28,7 @@ public abstract class Unit : MonoBehaviour {
 	public abstract bool IsAttackPossible(GameObject obj);
 	public abstract void TakeDamage(int damage);
 
-	protected abstract void Attack(GameObject obj);
+	public abstract void Attack(GameObject moveToObj, GameObject attackObj);
 
 	#endregion
 
@@ -48,19 +45,48 @@ public abstract class Unit : MonoBehaviour {
 		}
 	}
 
-	//Shared and implemented functionality for Move and Death
-	protected void Move (GameObject nextTile) {
+	//Shared and implemented functionality for Move, ShowPossibleMoves and Death
+	public void Move (GameObject nextTile) {
 		
 		curTile.GetComponent<Tile>().occupied = false;
-		curTile.GetComponent<Tile>().available = true;
 		curTile.GetComponent<Tile>().occupier = null;
-		
-		transform.position = nextTile.transform.position;
+
+		StartCoroutine(SlidingMove(nextTile.transform.position));
 		curTile = nextTile;
 
 		curTile.GetComponent<Tile>().occupied = true;
 		curTile.GetComponent<Tile>().available = false;
 		curTile.GetComponent<Tile>().occupier = gameObject;
+	}
+
+	IEnumerator SlidingMove(Vector3 pos) {
+		float travelTime = 1f;
+		float time = 0;
+
+		while(time < travelTime) {
+			transform.position = Vector3.Lerp(transform.position, pos, time/travelTime);
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+		}
+	}
+
+	//Show possible moves on the grid
+	public void ShowPossibleMoves() {
+
+		int curUnitHeightInd = curTile.GetComponent<Tile>().HeightIndex;
+		int curUnitWidthInd = curTile.GetComponent<Tile>().WidthIndex;
+		
+		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+				if(!GridController.Instance.tileArray[i,j].occupied) {
+					if(Mathf.Abs(j - curUnitWidthInd) <= possibleMoves && Mathf.Abs(i - curUnitHeightInd) <= possibleMoves) {
+						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
+						GridController.Instance.tileArray[i,j].available = true;
+					}
+				}
+			}
+		}
+
 	}
 	
 	//Remember to announce somewhere that I died
@@ -68,15 +94,5 @@ public abstract class Unit : MonoBehaviour {
 		GameFlow.Instance.KillUnit(gameObject);
 		curTile.GetComponent<Tile>().occupied = false;
 		gameObject.SetActive(false);
-	}
-
-	//I need the two following methods for automatically
-	//setting the two "standard" possibilities.
-	public void SetAttackAsAction() {
-		CurrentAction = Attack;
-	}
-
-	public void SetMoveAsAction() {
-		CurrentAction = Move;
 	}
 }

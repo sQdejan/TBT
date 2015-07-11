@@ -28,7 +28,11 @@ public class MCTS : MonoBehaviour {
 	MCTSNode rootNode;
 	MCTSNode currentNode;
 
+	float EC = (float)(1f/Math.Sqrt(2)); //Exploration constant
+
 	System.Random rnd = new System.Random();
+
+	int totalcalls; //Just for personal stats on the MCTS - can be deleted
 
 	void Start() {
 		instance = this;
@@ -38,33 +42,54 @@ public class MCTS : MonoBehaviour {
 		GetMove(new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0));
 	}
 
-	//Remember to end the function with storing the move somewhere, most likely in AIGameFlow
 	void GetMove(MCTSNode node) {
 		rootNode = node;
 
 		//A while loop will run here
-		int index = 0;
-
-		while (index < 1) {
-			TreePolicy();
-			DefaultPolicy();
-			index++;
-		}
-
-
-
-//		Stopwatch sw = new Stopwatch();
-//		sw.Start();
-//		int i = 0;
-//		while(sw.ElapsedMilliseconds < 5000) {
+//		int index = 0;
+//
+//		while (index < 100) {
 //			TreePolicy();
+//			float reward = DefaultPolicy();
+//			BackPropagate(reward);
+//			index++;
 //		}
-//		sw.Stop();
+//
+//		UnityEngine.Debug.Log("Donski");
+//		currentNode = rootNode;
+//		BestChild(0);
+//		AIGameFlow.move = currentNode;
 //		AIGameFlow.finished = true;
+
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+		int i = 0;
+		totalcalls = 0;
+		while(sw.ElapsedMilliseconds < 5000) {
+			TreePolicy();
+			float reward = DefaultPolicy();
+			BackPropagate(reward);
+			i++;
+		}
+		sw.Stop();
+
+		//Find the best move
+		currentNode = rootNode;
+		BestChild(0);
+		AIGameFlow.move = currentNode;
+
+		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
+		UnityEngine.Debug.Log("Cycles = " + i);
+
+		AIGameFlow.finished = true;
 	}
 
-	//VERY IMPORTANT: remember to update the TURNORDERLIST item each time a move is happening (meaning change GameStateUnit in the list)
+	/// <summary>
+	/// The tree policy is how I traverse the tree and also makes sure to expand nodes
+	/// if needed.
+	/// </summary>
 	void TreePolicy() {
+
 		gameState = AIGameFlow.Instance.GetCopyOfGameState();
 		currentNode = rootNode;
 
@@ -73,19 +98,54 @@ public class MCTS : MonoBehaviour {
 				Expand();
 				break;
 			} else {
-				break;
+				BestChild(EC);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Find the best child in order to traverse the tree
+	/// Once it has been found, a DefaultPolicy will be played out
+	/// </summary>
+	/// <param name="C">C.</param>
+	void BestChild(float C) {
+
+		int bestIndex = 0;
+		float bestScore = float.MinValue;
+
+		for(int i = 0; i < currentNode.children.Count; i++) {
+			float tmpUCTValue = UCTValue(currentNode.children[i], C);
+
+			if(tmpUCTValue > bestScore) {
+				bestScore = tmpUCTValue;
+				bestIndex = i;
 			}
 		}
 
-//		AIGameFlow.PrintGameState(gameState);
-//		gameState[0,5].occupier.Move(gameState[2,5]);
-//		UnityEngine.Debug.Log("-----");
-//		AIGameFlow.PrintGameState(gameState);
-	}
+		currentNode = currentNode.children[bestIndex];
 
-	void BestChild() {
-	}
+		//I need to make the move as I do NOT store gamestate on each node
+		//if C == 0 I am done with the process and no move is required
+		//as it will give an error!!
+		if(C != 0) {
+			if(currentNode.action == Action.MOVE) {
+				AIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
+			} else if(currentNode.action == Action.ATTACK) {
+				if(currentNode.mbagsH == -1)
+					AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
+				else
+					AIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
+			}
 
+			AIGameFlow.Instance.StartNextTurn();
+		}
+	}
+	
+	/// <summary>
+	/// If the currentnode is not fully expanded we just take the next
+	/// child in the list - this is to make sure that all childs are visited
+	/// at least once
+	/// </summary>
 	void Expand() {
 
 		currentNode = currentNode.children[currentNode.curChildIndex];
@@ -110,6 +170,14 @@ public class MCTS : MonoBehaviour {
 		return ++currentNode.curChildIndex >= currentNode.children.Count;
 	}
 
+	/// <summary>
+	/// Default policy. In this case it just does a uniformly distributed random move to 
+	/// do the play-out. Once a final state has been reached, a reward for that current state
+	/// will be returned:
+	/// 	1 if the AI wins
+	/// 	0 if the Player wins
+	/// </summary>
+	/// <returns>The default policy rewards.</returns>
 	float DefaultPolicy() {
 
 		int result = -1;
@@ -128,19 +196,32 @@ public class MCTS : MonoBehaviour {
 					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
 
+			totalcalls++;
 			result = AIGameFlow.Instance.StartNextTurn();
 		}
 
-		UnityEngine.Debug.Log("2 good 2 be true with fucking result = " + result);
-
-		return 0;
+		return result;
 	}
 
-	float UCTValue() {
-		return 0;
+	/// <summary>
+	/// This version of MCTS is called UCT, and the below calculation is used in order to find
+	/// the next child in the list, given that all childs have been visited once. First part of
+	/// the equation is the exploitation part, the second part is the exploration.
+	/// </summary>
+	float UCTValue(MCTSNode n, float C) {
+		return (float)((n.reward / n.timeVisited) + C*(Math.Sqrt(2*Math.Log(n.parent.timeVisited) / n.timeVisited)));
 	}
 
+	/// <summary>
+	/// Back propagate the reward for future UCT value calculations.
+	/// </summary>
+	/// <param name="reward">Reward.</param>
 	void BackPropagate(float reward) {
+		while(currentNode != null) {
+			currentNode.timeVisited++;
+			currentNode.reward += reward;
+			currentNode = currentNode.parent;
+		}
 	}
 
 }

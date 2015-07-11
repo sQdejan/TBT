@@ -32,11 +32,4 @@ public abstract class AIUnit {
 
 		curgsUnit = to;
 	}
-	
-	//Remember to announce somewhere that I died
-	protected void Death (int h, int w) {
-
-	}
-
-
 }

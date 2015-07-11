@@ -37,23 +37,28 @@ public class Warrior : Unit {
 		return false;
 	}
 
-	protected override void Attack (GameObject obj) {
+	public override void Attack (GameObject moveToObj, GameObject attackObj) {
 
 		//Am I within attack range?
-		int enemyHeight = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().HeightIndex;
-		int enemyWidth = obj.GetComponent<Unit>().curTile.GetComponent<Tile>().WidthIndex;
+		int enemyHeight = attackObj.GetComponent<Unit>().curTile.GetComponent<Tile>().HeightIndex;
+		int enemyWidth = attackObj.GetComponent<Unit>().curTile.GetComponent<Tile>().WidthIndex;
 		
 		int thisHeight = curTile.GetComponent<Tile>().HeightIndex;
 		int thisWidth = curTile.GetComponent<Tile>().WidthIndex;
 
 		if(Mathf.Abs(enemyHeight - thisHeight) <= attackRange && Mathf.Abs(enemyWidth - thisWidth) <= attackRange) {
-			obj.GetComponent<Unit>().TakeDamage(damage);
+			attackObj.GetComponent<Unit>().TakeDamage(damage);
 			return;
 		} 
 
 		//Else I have to move the unit in order to attack.
-		Move (attackMoveTile);
-		obj.GetComponent<Unit>().TakeDamage(damage);
+
+		if(moveToObj)
+			Move(moveToObj);
+		else
+			Move(attackMoveTile);
+
+		attackObj.GetComponent<Unit>().TakeDamage(damage);
 	}
 
 	public override void TakeDamage (int damage) {
@@ -61,8 +66,6 @@ public class Warrior : Unit {
 
 		if(health <= 0)
 			Death();
-
-		Debug.Log("Took damage, auch!");
 	}
 
 	GameObject ClosestTile(GameObject obj) {

@@ -1,13 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AI/MCTS.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game Essentials/GameFlow.cs">
     <Files>
-      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="134" Column="75" />
-      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="83" Column="25" />
-      <File FileName="Assets/Scripts/AIUnit/AIWarrior.cs" Line="19" Column="28" />
-      <File FileName="Assets/Scripts/AIUnit/AIUnit.cs" Line="38" Column="3" />
-      <File FileName="Assets/Scripts/Units/Warrior.cs" Line="5" Column="25" />
-      <File FileName="Assets/Scripts/AI/MCTSNode.cs" Line="36" Column="18" />
+      <File FileName="Assets/Scripts/Units/Unit.cs" Line="54" Column="60" />
+      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="180" Column="37" />
+      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="184" Column="1" />
+      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="235" Column="22" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

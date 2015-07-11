@@ -68,4 +68,14 @@ public class GridController : MonoBehaviour {
 
 		return returnArray;
 	}
+
+	//To reset grid when turn is over
+	public void ClearGrid() {
+		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileOriginal;
+				GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = false;
+			}
+		}
+	}
 }

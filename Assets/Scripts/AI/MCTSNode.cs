@@ -25,7 +25,7 @@ public class MCTSNode {
 
 	//For the statistics
 	public int timeVisited;
-	public int reward;
+	public float reward;
 
 	public MCTSNode(MCTSNode parent, Action action, int mbagsH, int mbagsW, int gsH, int gsW) {
 		this.parent = parent;

@@ -91,8 +91,7 @@ public class PlayerController : MonoBehaviour {
 
 		//If an enemy is hovered above and mouse clicked, attack it if possible.
 		if(activeEnemy && Input.GetMouseButtonUp(0) && currentUnit.GetComponent<Unit>().IsAttackPossible(activeEnemy)) {
-			currentUnit.GetComponent<Unit>().SetAttackAsAction();
-			currentUnit.GetComponent<Unit>().CurrentAction(activeEnemy);
+			currentUnit.GetComponent<Unit>().Attack(null, activeEnemy);
 			EndTurn();
 		} else if (activeEnemy && !currentUnit.GetComponent<Unit>().IsAttackPossible(activeEnemy)) {
 			cursorState = CursorState.NOATTACK;
@@ -132,20 +131,9 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		if(activeTile && Input.GetMouseButtonUp(0) && activeTile.GetComponent<Tile>().available) {
-			currentUnit.GetComponent<Unit>().SetMoveAsAction();
-			currentUnit.GetComponent<Unit>().CurrentAction(activeTile);
+			currentUnit.GetComponent<Unit>().Move(activeTile);
 			EndTurn();
 		} 
-	}
-
-	//To reset grid when turn is over
-	void ClearGrid() {
-		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
-			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
-				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileOriginal;
-				GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = false;
-			}
-		}
 	}
 
 	void CursorIcon() {
@@ -170,32 +158,13 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	public void ShowPossibleTiles(int possibleMoves) {
-		
-		GameObject tmpTile = currentUnit.GetComponent<Unit>().curTile;
-		
-		int curUnitHeightInd = tmpTile.GetComponent<Tile>().HeightIndex;
-		int curUnitWidthInd = tmpTile.GetComponent<Tile>().WidthIndex;
-		
-		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
-			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
-				if(!GridController.Instance.tileArray[i,j].occupied) {
-					if(Mathf.Abs(j - curUnitWidthInd) <= possibleMoves && Mathf.Abs(i - curUnitHeightInd) <= possibleMoves) {
-						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
-						GridController.Instance.tileArray[i,j].available = true;
-					}
-				}
-			}
-		}
-	}
-
 	//This function is public to be used when the "end turn" button is pressed
 	void EndTurn() {
 
 		tileSelectorObject.transform.position = tileSelObjPos;
 		activeTile = null;
 		Unit.attackMoveTile = null;
-		ClearGrid();
+		GridController.Instance.ClearGrid();
 		
 		//Just reset sprites
 		if(activeEnemy) {
