@@ -84,7 +84,7 @@ public class GameFlow : MonoBehaviour {
 		if(tmpObject.tag == "PlayerUnit") {
 			PlayerController.Instance.currentUnit = tmpObject;
 			//Show what unit is the current active
-			PlayerController.Instance.currentUnit.GetComponent<SpriteRenderer>().sprite = PlayerController.Instance.currentUnit.GetComponent<Unit>().hoverSprite;
+			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().changeSpriteColor;
 			//Show posssible moves
 			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
 
@@ -93,7 +93,7 @@ public class GameFlow : MonoBehaviour {
 			//AI shashizzle in here
 			Debug.Log("Starting the process");
 
-			tmpObject.GetComponent<SpriteRenderer>().sprite = tmpObject.GetComponent<Unit>().hoverSprite;
+			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().changeSpriteColor;
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 
 			AIGameFlow.Instance.SetupGameState();
@@ -170,7 +170,7 @@ public class GameFlow : MonoBehaviour {
 				curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
 		}
 
-		unitTurnOrderList[curTurnIndex].GetComponent<SpriteRenderer>().sprite = unitTurnOrderList[curTurnIndex].GetComponent<Unit>().originalSprite;
+		unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
 		GridController.Instance.ClearGrid();
 
 		EndTurn();

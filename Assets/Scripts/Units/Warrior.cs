@@ -61,13 +61,6 @@ public class Warrior : Unit {
 		attackObj.GetComponent<Unit>().TakeDamage(damage);
 	}
 
-	public override void TakeDamage (int damage) {
-		health -= damage;
-
-		if(health <= 0)
-			Death();
-	}
-
 	GameObject ClosestTile(GameObject obj) {
 
 		List<GameObject> listGameobject = AvailableTiles(obj);

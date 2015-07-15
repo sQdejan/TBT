@@ -16,7 +16,6 @@ public abstract class AIUnit {
 
 	#region Methods to be overridden
 	
-	public abstract void TakeDamage(int damage);
 	public abstract void Attack(GameStateUnit moveTo, GameStateUnit attack);
 	public abstract List<MCTSNode> GetPossibleMoves(MCTSNode parent);
 	public abstract AIUnit Copy(GameStateUnit unit);
@@ -31,5 +30,13 @@ public abstract class AIUnit {
 		curgsUnit.occupier = null;
 
 		curgsUnit = to;
+	}
+
+	public void TakeDamage (int damage) {
+		health -= damage;
+		
+		if(health <= 0) {
+			AIGameFlow.Instance.KillUnit(this);
+		}
 	}
 }

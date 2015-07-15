@@ -35,7 +35,7 @@ public class AIGameFlow : MonoBehaviour {
 	public static MCTSNode move;
 
 	public List<AIUnit> turnOrderList;
-	public int curTurnOrderIndex;
+	[HideInInspector] public int curTurnOrderIndex;
 	
 	GameStateUnit[,] gameState;
 	GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list below
@@ -76,6 +76,8 @@ public class AIGameFlow : MonoBehaviour {
 
 					if(occupier.GetComponent<Unit>().classType == ClassType.WARRIOR) {
 						tmpUnit = new AIWarrior();
+					} else if (occupier.GetComponent<Unit>().classType == ClassType.RANGED) {
+						tmpUnit = new AIRanger();
 					}
 
 					if(occupier.tag == "PlayerUnit") {

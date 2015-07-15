@@ -190,8 +190,9 @@ public class MCTS : MonoBehaviour {
 			if(action.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
 			} else if(action.action == Action.ATTACK) {
-				if(action.mbagsH == -1)
+				if(action.mbagsH == -1) {
 					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
+				}
 				else
 					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}

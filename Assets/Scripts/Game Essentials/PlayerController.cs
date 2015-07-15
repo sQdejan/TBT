@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -74,17 +74,17 @@ public class PlayerController : MonoBehaviour {
 
 		if(enemyHit.collider != null) {
 			if(activeEnemy) {
-				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+//				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
 			}
 
 			activeEnemy = enemyHit.collider.gameObject;
-			activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().hoverSprite;
+//			activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().hoverSprite;
 			foundEnemy = true;
 
 			cursorState = CursorState.ATTACK;
 		} else {
 			if(activeEnemy) {
-				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+//				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
 				activeEnemy = null;
 			}
 		}
@@ -168,12 +168,12 @@ public class PlayerController : MonoBehaviour {
 		
 		//Just reset sprites
 		if(activeEnemy) {
-			activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+//			activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponentInChildren<Unit>().oriSpriteColor;
 			activeEnemy = null;
 		}
 
 		if(currentUnit) {
-			currentUnit.GetComponent<SpriteRenderer>().sprite = currentUnit.GetComponent<Unit>().originalSprite;
+			currentUnit.GetComponentInChildren<SpriteRenderer>().color = currentUnit.GetComponentInChildren<Unit>().oriSpriteColor;
 			currentUnit = null;
 		}
 

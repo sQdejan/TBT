@@ -11,14 +11,6 @@ public class AIWarrior : AIUnit {
 		attack.occupier.TakeDamage(damage);
 	}
 
-	public override void TakeDamage (int damage) {
-		health -= damage;
-
-		if(health <= 0) {
-			AIGameFlow.Instance.KillUnit(this);
-		}
-	}
-
 	public override List<MCTSNode> GetPossibleMoves (MCTSNode parent) {
 
 		List<MCTSNode> rList = new List<MCTSNode>();

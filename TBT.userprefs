@@ -1,11 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game Essentials/GameFlow.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AIUnit/AIRanger.cs">
     <Files>
-      <File FileName="Assets/Scripts/Units/Unit.cs" Line="54" Column="60" />
-      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="180" Column="37" />
-      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="184" Column="1" />
-      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="235" Column="22" />
+      <File FileName="Assets/Scripts/AIUnit/AIRanger.cs" Line="11" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
