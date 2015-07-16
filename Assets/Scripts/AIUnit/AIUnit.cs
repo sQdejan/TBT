@@ -18,11 +18,17 @@ public abstract class AIUnit {
 	
 	public abstract void Attack(GameStateUnit moveTo, GameStateUnit attack);
 	public abstract List<MCTSNode> GetPossibleMoves(MCTSNode parent);
+	public abstract int GetPossibleMovesDefaultPolicy(List<MCTSNode> defaultList);
 	public abstract AIUnit Copy(GameStateUnit unit);
 
 	#endregion
 	
 	public void Move (GameStateUnit to) {
+
+		//If it's the same place anyways
+		if(to.h == curgsUnit.h && to.w == curgsUnit.w)
+			return;
+
 		to.state = curgsUnit.state;
 		to.occupier = curgsUnit.occupier;
 

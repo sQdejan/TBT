@@ -111,10 +111,10 @@ public class PlayerController : MonoBehaviour {
 		if(tileHit.collider != null) {
 			activeTile = tileHit.collider.gameObject;
 
-			if(activeTile.GetComponent<Tile>().occupied) {
-				cursorState = CursorState.NOMOVE;
-				return;
-			}
+//			if(activeTile.GetComponent<Tile>().occupied) {
+//				cursorState = CursorState.NOMOVE;
+//				return;
+//			}
 
 			if(!activeTile.GetComponent<Tile>().available) {
 				cursorState = CursorState.NOMOVE;	

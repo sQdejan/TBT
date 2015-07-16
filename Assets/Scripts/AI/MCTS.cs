@@ -34,8 +34,15 @@ public class MCTS : MonoBehaviour {
 
 	int totalcalls; //Just for personal stats on the MCTS - can be deleted
 
+	List<MCTSNode> defaultList = new List<MCTSNode>(); //Used for optimising default
+
 	void Start() {
 		instance = this;
+
+		for(int i = 0; i < 50; i++) {
+			defaultList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, 1, 1));
+		}
+
 	}
 
 	public void StartProcess() {
@@ -92,15 +99,18 @@ public class MCTS : MonoBehaviour {
 
 		gameState = AIGameFlow.Instance.GetCopyOfGameState();
 		currentNode = rootNode;
-
+		int k = 0;
 		while(true) {
 			if(!FullyExpanded()) {
 				Expand();
 				break;
 			} else {
-				BestChild(EC);
+				k++;
+				if(!BestChild(EC))
+					break;
 			}
 		}
+		UnityEngine.Debug.Log("I visit best child " + k + " times");
 	}
 
 	/// <summary>
@@ -108,24 +118,44 @@ public class MCTS : MonoBehaviour {
 	/// Once it has been found, a DefaultPolicy will be played out
 	/// </summary>
 	/// <param name="C">C.</param>
-	void BestChild(float C) {
+	bool BestChild(float C) {
 
 		int bestIndex = 0;
-		float bestScore = float.MinValue;
+		float bestScore = 0;
 
-		for(int i = 0; i < currentNode.children.Count; i++) {
-			float tmpUCTValue = UCTValue(currentNode.children[i], C);
+		//I need to consider if it's the AI or the Player's move
+		char curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
+		if(curTurn == AIGameFlow.GS_AI || C == 0) {
+			if(C==0)
+			bestScore = float.MinValue;
 
-			if(tmpUCTValue > bestScore) {
-				bestScore = tmpUCTValue;
-				bestIndex = i;
+			for(int i = 0; i < currentNode.children.Count; i++) {
+				float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
+
+				if(tmpUCTValue > bestScore) {
+					bestScore = tmpUCTValue;
+					bestIndex = i;
+				}
 			}
+		} else if (curTurn == AIGameFlow.GS_PLAYER) {
+			bestScore = float.MaxValue;
+			
+			for(int i = 0; i < currentNode.children.Count; i++) {
+				float tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
+				
+				if(tmpUCTValue < bestScore) {
+					bestScore = tmpUCTValue;
+					bestIndex = i;
+				}
+			}
+		} else {
+			UnityEngine.Debug.Log("I should never ever be here!!");
 		}
 
 		currentNode = currentNode.children[bestIndex];
 
-		//I need to make the move as I do NOT store gamestate on each node
-		//if C == 0 I am done with the process and no move is required
+		//I need to make the move as I do NOT store gamestate on each node.
+		//If C == 0 I am done with the process and no move is required
 		//as it will give an error!!
 		if(C != 0) {
 			if(currentNode.action == Action.MOVE) {
@@ -138,13 +168,23 @@ public class MCTS : MonoBehaviour {
 			}
 
 			AIGameFlow.Instance.StartNextTurn();
+		} else {
+			return true;
+		}
+
+		//If I have reached a final state return false. 
+		//This is to make sure I don't expand further.
+		if(AIGameFlow.Instance.IsGameOver() == -1) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
 	/// <summary>
 	/// If the currentnode is not fully expanded we just take the next
 	/// child in the list - this is to make sure that all childs are visited
-	/// at least once
+	/// at least once.
 	/// </summary>
 	void Expand() {
 
@@ -177,16 +217,40 @@ public class MCTS : MonoBehaviour {
 	/// 	1 if the AI wins
 	/// 	0 if the Player wins
 	/// </summary>
-	/// <returns>The default policy rewards.</returns>
+	/// <returns>The default policy reward.</returns>
+//	float DefaultPolicy() {
+//
+//		int result = AIGameFlow.Instance.IsGameOver();
+//
+//		while(result == -1) {
+//			List<MCTSNode> possibleActions = AIGameFlow.activeUnit.GetPossibleMoves(null);
+//
+//			MCTSNode action = possibleActions[rnd.Next(0, possibleActions.Count)];
+//			if(action.action == Action.MOVE) {
+//				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
+//			} else if(action.action == Action.ATTACK) {
+//				if(action.mbagsH == -1) {
+//					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
+//				}
+//				else
+//					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
+//			}
+//
+//			totalcalls++;
+//			result = AIGameFlow.Instance.StartNextTurn();
+//		}
+//
+//		return result;
+//	}
+
 	float DefaultPolicy() {
-
-		int result = -1;
-
+		
+		int result = AIGameFlow.Instance.IsGameOver();
+		
 		while(result == -1) {
-
-			List<MCTSNode> possibleActions = AIGameFlow.activeUnit.GetPossibleMoves(null);
-			MCTSNode action = possibleActions[rnd.Next(0, possibleActions.Count)];
-
+			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
+			
+			MCTSNode action = defaultList[rnd.Next(0, index + 1)];
 			if(action.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
 			} else if(action.action == Action.ATTACK) {
@@ -196,11 +260,11 @@ public class MCTS : MonoBehaviour {
 				else
 					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
-
+			
 			totalcalls++;
 			result = AIGameFlow.Instance.StartNextTurn();
 		}
-
+		
 		return result;
 	}
 
@@ -209,8 +273,12 @@ public class MCTS : MonoBehaviour {
 	/// the next child in the list, given that all childs have been visited once. First part of
 	/// the equation is the exploitation part, the second part is the exploration.
 	/// </summary>
-	float UCTValue(MCTSNode n, float C) {
+	float UCTValueAI(MCTSNode n, float C) {
 		return (float)((n.reward / n.timeVisited) + C*(Math.Sqrt(2*Math.Log(n.parent.timeVisited) / n.timeVisited)));
+	}
+
+	float UCTValuePlayer(MCTSNode n, float C) {
+		return (float)((n.reward / n.timeVisited) - C*(Math.Sqrt(2*Math.Log(n.parent.timeVisited) / n.timeVisited)));
 	}
 
 	/// <summary>

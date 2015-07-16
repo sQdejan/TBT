@@ -85,7 +85,7 @@ public abstract class Unit : MonoBehaviour {
 		
 		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
 			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
-				if(!GridController.Instance.tileArray[i,j].occupied) {
+				if(!GridController.Instance.tileArray[i,j].occupied || GridController.Instance.tileArray[i,j].occupier.Equals(this.gameObject)) {
 					if(Mathf.Abs(j - curUnitWidthInd) <= possibleMoves && Mathf.Abs(i - curUnitHeightInd) <= possibleMoves) {
 						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
 						GridController.Instance.tileArray[i,j].available = true;

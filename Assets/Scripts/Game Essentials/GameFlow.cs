@@ -173,6 +173,7 @@ public class GameFlow : MonoBehaviour {
 		unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
 		GridController.Instance.ClearGrid();
 
+		AIGameFlow.finished = false;
 		EndTurn();
 	}
 

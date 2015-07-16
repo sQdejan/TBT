@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.ComponentModel;
 
 public class AIGameFlow : MonoBehaviour {
 
@@ -51,7 +52,6 @@ public class AIGameFlow : MonoBehaviour {
 			return;
 
 		GameFlow.Instance.MoveHasBeenCalculated();
-		finished = false;
 	}
 
 	#region Setup related
@@ -140,7 +140,7 @@ public class AIGameFlow : MonoBehaviour {
 		turnOrderList.RemoveAt(tmpIndex);
 	}
 
-	int IsGameOver() {
+	public int IsGameOver() {
 		bool foundPlayer = false;
 		bool foundAI = false;
 
