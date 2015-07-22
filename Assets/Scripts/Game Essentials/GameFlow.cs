@@ -178,8 +178,8 @@ public class GameFlow : MonoBehaviour {
 	}
 
 	public void RestartGame() {
-		AIGameFlow.Instance.AbortThread();
-		Application.LoadLevel(Application.loadedLevel);
+		AIGameFlow.Instance.CancelBackgroundWorker();
+//		Application.LoadLevel(Application.loadedLevel);
 	}
 
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.ComponentModel;
 using System;
 
 public class MCTS : MonoBehaviour {
@@ -31,9 +32,7 @@ public class MCTS : MonoBehaviour {
 	float EC = (float)(1f/Math.Sqrt(2)); //Exploration constant
 
 	System.Random rnd = new System.Random();
-
-	int totalcalls; //Just for personal stats on the MCTS - can be deleted
-
+	
 	List<MCTSNode> defaultList = new List<MCTSNode>(); //Used for optimising default
 
 	void Start() {
@@ -45,11 +44,12 @@ public class MCTS : MonoBehaviour {
 
 	}
 
-	public void StartProcess() {
-		GetMove(new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0));
+	public void StartProcess(object sender, DoWorkEventArgs e) {
+		BackgroundWorker worker = sender as BackgroundWorker;
+		GetMove(new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0), worker, e);
 	}
 
-	void GetMove(MCTSNode node) {
+	void GetMove(MCTSNode node, BackgroundWorker worker, DoWorkEventArgs e) {
 		rootNode = node;
 
 		//A while loop will run here
@@ -73,6 +73,12 @@ public class MCTS : MonoBehaviour {
 		int i = 0;
 		totalcalls = 0;
 		while(sw.ElapsedMilliseconds < 5000) {
+
+			if(worker.CancellationPending) {
+				e.Cancel = true;
+				break;
+			}
+
 			TreePolicy();
 			float reward = DefaultPolicy();
 			BackPropagate(reward);
@@ -84,6 +90,12 @@ public class MCTS : MonoBehaviour {
 		currentNode = rootNode;
 		BestChild(0);
 		AIGameFlow.move = currentNode;
+
+		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
+		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
+		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / defaultCalls));
+
+		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
 
 		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
 		UnityEngine.Debug.Log("Cycles = " + i);
@@ -110,8 +122,13 @@ public class MCTS : MonoBehaviour {
 					break;
 			}
 		}
-		UnityEngine.Debug.Log("I visit best child " + k + " times");
+
+		if(k > maxChildIndex)
+			maxChildIndex = k;
+//		UnityEngine.Debug.Log("I visit best child " + k + " times");
 	}
+
+	int maxChildIndex = 0;
 
 	/// <summary>
 	/// Find the best child in order to traverse the tree
@@ -218,38 +235,20 @@ public class MCTS : MonoBehaviour {
 	/// 	0 if the Player wins
 	/// </summary>
 	/// <returns>The default policy reward.</returns>
-//	float DefaultPolicy() {
-//
-//		int result = AIGameFlow.Instance.IsGameOver();
-//
-//		while(result == -1) {
-//			List<MCTSNode> possibleActions = AIGameFlow.activeUnit.GetPossibleMoves(null);
-//
-//			MCTSNode action = possibleActions[rnd.Next(0, possibleActions.Count)];
-//			if(action.action == Action.MOVE) {
-//				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
-//			} else if(action.action == Action.ATTACK) {
-//				if(action.mbagsH == -1) {
-//					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
-//				}
-//				else
-//					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
-//			}
-//
-//			totalcalls++;
-//			result = AIGameFlow.Instance.StartNextTurn();
-//		}
-//
-//		return result;
-//	}
-
 	float DefaultPolicy() {
 		
 		int result = AIGameFlow.Instance.IsGameOver();
-		
+
+		defaultCalls++;
+
 		while(result == -1) {
 			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
-			
+
+			if(index > highestIndex)
+				highestIndex = index;
+
+			maxIndex += index;
+
 			MCTSNode action = defaultList[rnd.Next(0, index + 1)];
 			if(action.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
@@ -260,13 +259,19 @@ public class MCTS : MonoBehaviour {
 				else
 					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
-			
+
 			totalcalls++;
 			result = AIGameFlow.Instance.StartNextTurn();
 		}
-		
+
 		return result;
 	}
+
+	//For testing/debugging
+	int highestIndex = 0;
+	long maxIndex = 0;
+	int totalcalls = 0;
+	int defaultCalls = 0;
 
 	/// <summary>
 	/// This version of MCTS is called UCT, and the below calculation is used in order to find

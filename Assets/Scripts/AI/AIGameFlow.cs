@@ -39,9 +39,10 @@ public class AIGameFlow : MonoBehaviour {
 	[HideInInspector] public int curTurnOrderIndex;
 	
 	GameStateUnit[,] gameState;
-	GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list below
+	GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list above (turnOrderList)
 
 	Thread MCTSThread;
+	BackgroundWorker MCTSBackgroundWorker;
 
 	void Start() {
 		instance = this;
@@ -97,10 +98,29 @@ public class AIGameFlow : MonoBehaviour {
 			}
 		}
 
+		MCTSBackgroundWorker = new BackgroundWorker();
+
+		MCTSBackgroundWorker.WorkerSupportsCancellation = true;
+
+		MCTSBackgroundWorker.DoWork += new DoWorkEventHandler(MCTS.Instance.StartProcess);
+		MCTSBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(MCTSBackgroundWorker_RunWorkerCompleted);
+		MCTSBackgroundWorker.RunWorkerAsync();
+
 //		MCTS.Instance.StartProcess();
 
-		MCTSThread = new Thread(MCTS.Instance.StartProcess);
-		MCTSThread.Start();
+//		MCTSThread = new Thread(MCTS.Instance.StartProcess);
+//		MCTSThread.Start();
+	}
+
+	void MCTSBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+
+		if(e.Error != null) {
+			Debug.LogError(e.Error.Message);
+		} else if(e.Cancelled) {
+			Debug.Log("Event is cancelled");
+		} else {
+//			Debug.Log("We succeeded");
+		}
 	}
 
 	void CopyStats(Unit from, AIUnit to) {
@@ -233,8 +253,9 @@ public class AIGameFlow : MonoBehaviour {
 	}
 
 	//If I reset the scene I abort the thread for good measures
-	public void AbortThread() {
-		MCTSThread.Abort();
+	public void CancelBackgroundWorker() {
+//		MCTSThread.Abort();
+		MCTSBackgroundWorker.CancelAsync();
 	}
 
 //	void OnGUI() {
