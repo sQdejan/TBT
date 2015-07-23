@@ -35,6 +35,13 @@ public class MCTS : MonoBehaviour {
 	
 	List<MCTSNode> defaultList = new List<MCTSNode>(); //Used for optimising default
 
+
+	//For testing/debugging
+	int highestIndex = 0;
+	long maxIndex = 0;
+	int totalcalls = 0;
+	int maxChildIndex = 0;
+
 	void Start() {
 		instance = this;
 
@@ -46,11 +53,42 @@ public class MCTS : MonoBehaviour {
 
 	public void StartProcess(object sender, DoWorkEventArgs e) {
 		BackgroundWorker worker = sender as BackgroundWorker;
-		GetMove(new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0), worker, e);
+		GetMove(worker, e);
 	}
 
-	void GetMove(MCTSNode node, BackgroundWorker worker, DoWorkEventArgs e) {
-		rootNode = node;
+	/// <summary>
+	/// I use this function in order to continue on the tree previously expanded
+	/// in order not to lose the information/statistic already discovered
+	/// </summary>
+	bool UpdateRootNode() {
+
+		if(currentNode == null) {
+			return false;
+		}
+
+		foreach(MCTSNode node in currentNode.children) {
+			if(node.Equals(GameFlow.playerLastMove)) {
+				rootNode = node;
+				UnityEngine.Debug.Log("I found a new rootnode and is has childs " + node.children.Count + " and reach index " + node.curChildIndex);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
+
+		highestIndex = 0;
+		maxIndex = 0;
+		totalcalls = 0;
+		maxChildIndex = 0;
+
+		if (!UpdateRootNode()) {
+			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
+		}
+
+//		rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0); 
 
 		//A while loop will run here
 //		int index = 0;
@@ -93,7 +131,7 @@ public class MCTS : MonoBehaviour {
 
 		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
 		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
-		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / defaultCalls));
+		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
 
 		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
 
@@ -114,6 +152,7 @@ public class MCTS : MonoBehaviour {
 		int k = 0;
 		while(true) {
 			if(!FullyExpanded()) {
+				currentNode.curChildIndex++;
 				Expand();
 				break;
 			} else {
@@ -125,10 +164,9 @@ public class MCTS : MonoBehaviour {
 
 		if(k > maxChildIndex)
 			maxChildIndex = k;
+
 //		UnityEngine.Debug.Log("I visit best child " + k + " times");
 	}
-
-	int maxChildIndex = 0;
 
 	/// <summary>
 	/// Find the best child in order to traverse the tree
@@ -143,9 +181,6 @@ public class MCTS : MonoBehaviour {
 		//I need to consider if it's the AI or the Player's move
 		char curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
 		if(curTurn == AIGameFlow.GS_AI || C == 0) {
-			if(C==0)
-			bestScore = float.MinValue;
-
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
 
@@ -178,9 +213,9 @@ public class MCTS : MonoBehaviour {
 			if(currentNode.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
 			} else if(currentNode.action == Action.ATTACK) {
-				if(currentNode.mbagsH == -1)
-					AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
-				else
+//				if(currentNode.mbagsH == -1)
+//					AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
+//				else
 					AIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
 			}
 
@@ -210,9 +245,9 @@ public class MCTS : MonoBehaviour {
 		if(currentNode.action == Action.MOVE) {
 			AIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
 		} else if(currentNode.action == Action.ATTACK) {
-			if(currentNode.mbagsH == -1)
-				AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
-			else
+//			if(currentNode.mbagsH == -1)
+//				AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
+//			else
 				AIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
 		}
 
@@ -224,7 +259,7 @@ public class MCTS : MonoBehaviour {
 			currentNode.children = AIGameFlow.activeUnit.GetPossibleMoves(currentNode);
 		}
 
-		return ++currentNode.curChildIndex >= currentNode.children.Count;
+		return currentNode.curChildIndex >= currentNode.children.Count - 1;
 	}
 
 	/// <summary>
@@ -239,8 +274,6 @@ public class MCTS : MonoBehaviour {
 		
 		int result = AIGameFlow.Instance.IsGameOver();
 
-		defaultCalls++;
-
 		while(result == -1) {
 			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
 
@@ -250,14 +283,15 @@ public class MCTS : MonoBehaviour {
 			maxIndex += index;
 
 			MCTSNode action = defaultList[rnd.Next(0, index + 1)];
+
 			if(action.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
 			} else if(action.action == Action.ATTACK) {
-				if(action.mbagsH == -1) {
-					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
-				}
-				else
+//				if(action.mbagsH == -1) {
+//					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
+//				} else {
 					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
+//				}
 			}
 
 			totalcalls++;
@@ -266,12 +300,6 @@ public class MCTS : MonoBehaviour {
 
 		return result;
 	}
-
-	//For testing/debugging
-	int highestIndex = 0;
-	long maxIndex = 0;
-	int totalcalls = 0;
-	int defaultCalls = 0;
 
 	/// <summary>
 	/// This version of MCTS is called UCT, and the below calculation is used in order to find

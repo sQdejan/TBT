@@ -36,4 +36,12 @@ public class MCTSNode {
 		this.gsW = gsW;
 	}
 
+	public bool Equals(MCTSNode node) {
+		if(node == null) {
+			Debug.LogError("obj is null");
+			return false;
+		}
+
+		return (action == node.action) && (mbagsH == node.mbagsH) && (mbagsW == node.mbagsW) && (gsH == node.gsH) && (gsW == node.gsW);
+	}
 }

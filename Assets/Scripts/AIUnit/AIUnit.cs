@@ -8,6 +8,7 @@ public abstract class AIUnit {
 	public int attackRange;
 	public int health;
 	public int damage;
+	public AttackDirection attackDirection;
 
 	//If this for instance is a player unit it can attack AI and vice versa
 	public char possibleTarget;
@@ -40,7 +41,7 @@ public abstract class AIUnit {
 
 	public void TakeDamage (int damage) {
 		health -= damage;
-		
+
 		if(health <= 0) {
 			AIGameFlow.Instance.KillUnit(this);
 		}

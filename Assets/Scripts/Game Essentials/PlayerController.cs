@@ -91,6 +91,16 @@ public class PlayerController : MonoBehaviour {
 
 		//If an enemy is hovered above and mouse clicked, attack it if possible.
 		if(activeEnemy && Input.GetMouseButtonUp(0) && currentUnit.GetComponent<Unit>().IsAttackPossible(activeEnemy)) {
+
+			//Setting the move that the player is taking in order to help the MCTS
+			Tile actEne = activeEnemy.GetComponent<Unit>().curTile.GetComponent<Tile>();
+			if(Unit.attackMoveTile == null) {
+				GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, -1, -1, actEne.HeightIndex, actEne.WidthIndex);
+			} else {
+				Tile mTile = Unit.attackMoveTile.GetComponent<Tile>();
+				GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, mTile.HeightIndex, mTile.WidthIndex, actEne.HeightIndex, actEne.WidthIndex);
+			}
+
 			currentUnit.GetComponent<Unit>().Attack(null, activeEnemy);
 			EndTurn();
 		} else if (activeEnemy && !currentUnit.GetComponent<Unit>().IsAttackPossible(activeEnemy)) {
@@ -131,6 +141,11 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		if(activeTile && Input.GetMouseButtonUp(0) && activeTile.GetComponent<Tile>().available) {
+
+			//Setting the move that the player is taking in order to help the MCTS
+			Tile aTile = activeTile.GetComponent<Tile>();
+			GameFlow.Instance.SetPlayerLastMove(Action.MOVE, -1, -1, aTile.HeightIndex, aTile.WidthIndex);
+
 			currentUnit.GetComponent<Unit>().Move(activeTile);
 			EndTurn();
 		} 

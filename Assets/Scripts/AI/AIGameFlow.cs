@@ -115,7 +115,8 @@ public class AIGameFlow : MonoBehaviour {
 	void MCTSBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
 
 		if(e.Error != null) {
-			Debug.LogError(e.Error.Message);
+			Debug.LogError(e.Error.Message + e.Error.StackTrace);
+//			Debug.LogError(e.Error.TargetSite);
 		} else if(e.Cancelled) {
 			Debug.Log("Event is cancelled");
 		} else {
@@ -128,6 +129,7 @@ public class AIGameFlow : MonoBehaviour {
 		to.attackRange = from.attackRange;
 		to.health = from.health;
 		to.damage = from.damage;
+		to.attackDirection = from.attackDirection;
 	}
 
 	#endregion
@@ -156,7 +158,7 @@ public class AIGameFlow : MonoBehaviour {
 		
 		if(tmpIndex < curTurnOrderIndex)
 			curTurnOrderIndex--;
-		
+
 		turnOrderList.RemoveAt(tmpIndex);
 	}
 
@@ -227,7 +229,7 @@ public class AIGameFlow : MonoBehaviour {
 	public static void PrintGameState(GameStateUnit[,] gs) {
 
 		for(int i = 0; i < gs.GetLength(0); i++) {
-			string printString = "";
+			string printString = i + ". ";
 
 			for(int j = 0; j < gs.GetLength(1); j++) {
 				printString += gs[i,j].state + " ";
@@ -295,7 +297,7 @@ public class GameStateUnit {
 		if(other.occupier != null)
 			this.occupier = other.occupier.Copy(this);
 	} 
-
+	
 	public char state;
 	public readonly int h, w;
 	public AIUnit occupier = null;

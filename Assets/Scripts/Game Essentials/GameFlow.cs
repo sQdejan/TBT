@@ -26,6 +26,7 @@ public class GameFlow : MonoBehaviour {
 	public Text turnDisplayer;
 
 	public static bool playersCurrentTurn = false;
+	public static MCTSNode playerLastMove = new MCTSNode(null, Action.ATTACK, -1, -1, -1, -1);
 
 	private List<GameObject> unitTurnOrderList = new List<GameObject>(); 
 	private int curTurnIndex = -1;
@@ -164,9 +165,9 @@ public class GameFlow : MonoBehaviour {
 			curUnit.Move(GridController.Instance.gridArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW]);
 		} else if (AIGameFlow.move.action == Action.ATTACK) {
 			Debug.Log("I attack");
-			if(AIGameFlow.move.mbagsH == -1)
-				curUnit.Attack(null, GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
-			else 
+//			if(AIGameFlow.move.mbagsH == -1)
+//				curUnit.Attack(null, GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
+//			else 
 				curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
 		}
 
@@ -177,9 +178,17 @@ public class GameFlow : MonoBehaviour {
 		EndTurn();
 	}
 
+	public void SetPlayerLastMove(Action a, int mh, int mw, int h, int w) {
+		playerLastMove.action = a;
+		playerLastMove.mbagsH = mh;
+		playerLastMove.mbagsH = mw;
+		playerLastMove.gsH = h;
+		playerLastMove.gsW = w;
+	}
+
 	public void RestartGame() {
-		AIGameFlow.Instance.CancelBackgroundWorker();
-//		Application.LoadLevel(Application.loadedLevel);
+//		AIGameFlow.Instance.CancelBackgroundWorker();
+		Application.LoadLevel(Application.loadedLevel);
 	}
 
 }

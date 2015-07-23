@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class AIRanger : AIUnit {
 
 	public override void Attack (GameStateUnit moveTo, GameStateUnit attack) {
-		if(moveTo != null)
-			Move(moveTo);
-
 		attack.occupier.TakeDamage(damage);
 	}
 
@@ -36,7 +33,7 @@ public class AIRanger : AIUnit {
 			y++;
 
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
-				rList.Add(new MCTSNode(parent, Action.ATTACK, -1, -1, y, curgsUnit.w));
+				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, y, curgsUnit.w));
 				break;
 			} else if (MCTS.Instance.gameState[y, curgsUnit.w].state == curgsUnit.state) {
 				break;
@@ -49,7 +46,7 @@ public class AIRanger : AIUnit {
 			y--;
 			
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
-				rList.Add(new MCTSNode(parent, Action.ATTACK, -1, -1, y, curgsUnit.w));
+				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, y, curgsUnit.w));
 				break;
 			} else if (MCTS.Instance.gameState[y, curgsUnit.w].state == curgsUnit.state) {
 				break;
@@ -62,7 +59,7 @@ public class AIRanger : AIUnit {
 			x++;
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
-				rList.Add(new MCTSNode(parent, Action.ATTACK, -1, -1, curgsUnit.h, x));
+				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, curgsUnit.h, x));
 				break;
 			} else if (MCTS.Instance.gameState[curgsUnit.h, x].state == curgsUnit.state) {
 				break;
@@ -75,7 +72,7 @@ public class AIRanger : AIUnit {
 			x--;
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
-				rList.Add(new MCTSNode(parent, Action.ATTACK, -1, -1, curgsUnit.h, x));
+				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, curgsUnit.h, x));
 				break;
 			} else if (MCTS.Instance.gameState[curgsUnit.h, x].state == curgsUnit.state) {
 				break;
@@ -123,8 +120,8 @@ public class AIRanger : AIUnit {
 				index++;
 				
 				defaultList[index].action = Action.ATTACK;
-				defaultList[index].mbagsH = -1;
-				defaultList[index].mbagsW = -1;
+				defaultList[index].mbagsH = 1;
+				defaultList[index].mbagsW = 1;
 				defaultList[index].gsH = y;
 				defaultList[index].gsW = curgsUnit.w;
 
@@ -144,8 +141,8 @@ public class AIRanger : AIUnit {
 				index++;
 				
 				defaultList[index].action = Action.ATTACK;
-				defaultList[index].mbagsH = -1;
-				defaultList[index].mbagsW = -1;
+				defaultList[index].mbagsH = 1;
+				defaultList[index].mbagsW = 1;
 				defaultList[index].gsH = y;
 				defaultList[index].gsW = curgsUnit.w;
 
@@ -165,8 +162,8 @@ public class AIRanger : AIUnit {
 				index++;
 				
 				defaultList[index].action = Action.ATTACK;
-				defaultList[index].mbagsH = -1;
-				defaultList[index].mbagsW = -1;
+				defaultList[index].mbagsH = 1;
+				defaultList[index].mbagsW = 1;
 				defaultList[index].gsH = curgsUnit.h;
 				defaultList[index].gsW = x;
 
@@ -186,8 +183,8 @@ public class AIRanger : AIUnit {
 				index++;
 				
 				defaultList[index].action = Action.ATTACK;
-				defaultList[index].mbagsH = -1;
-				defaultList[index].mbagsW = -1;
+				defaultList[index].mbagsH = 1;
+				defaultList[index].mbagsW = 1;
 				defaultList[index].gsH = curgsUnit.h;
 				defaultList[index].gsW = x;
 
@@ -207,6 +204,7 @@ public class AIRanger : AIUnit {
 		nRan.health = this.health;
 		nRan.damage = this.damage;
 		nRan.possibleTarget = this.possibleTarget;
+		nRan.attackDirection = this.attackDirection;
 		
 		nRan.curgsUnit = unit;
 		

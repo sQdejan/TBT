@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 public enum ClassType {WARRIOR, RANGED};
+public enum AttackDirection {DOWN, UP};
 
 public abstract class Unit : MonoBehaviour {
 
 	public ClassType classType;
+	public AttackDirection attackDirection;
 
 	public int possibleMoves;
 	public int attackRange;
@@ -48,6 +50,7 @@ public abstract class Unit : MonoBehaviour {
 		}
 
 		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
+		transform.GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
 	}
 
 	//Shared and implemented functionality for Move, ShowPossibleMoves and Death
@@ -64,6 +67,8 @@ public abstract class Unit : MonoBehaviour {
 		curTile.GetComponent<Tile>().occupied = true;
 		curTile.GetComponent<Tile>().available = false;
 		curTile.GetComponent<Tile>().occupier = gameObject;
+
+		attackMoveTile = null;
 	}
 
 	IEnumerator SlidingMove(Vector3 pos) {
