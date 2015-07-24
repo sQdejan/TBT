@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -23,12 +23,36 @@ public class AIWarrior : AIUnit {
 		rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, curgsUnit.h, curgsUnit.w));
 
 		//First I get the possible moves
-		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
-			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
-				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
-					if(Mathf.Abs(i - curgsUnit.h) <= possibleMoves && Mathf.Abs(j - curgsUnit.w) <= possibleMoves) {
-						MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
-						rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, i, j));
+//		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
+//			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+//				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+//					if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+//						MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+//						rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, i, j));
+//					}
+//				}
+//			}
+//		}
+
+		if(moveDirection == Direction.DOWN) {
+			for(int i = curgsUnit.h; i < MCTS.Instance.gameState.GetLength(0); i++) {
+				for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+					if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+						if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+							MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+							rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, i, j));
+						}
+					}
+				}
+			}
+		} else {
+			for(int i = curgsUnit.h; i >= 0; i--) {
+				for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+					if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+						if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+							MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+							rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, i, j));
+						}
 					}
 				}
 			}
@@ -36,7 +60,7 @@ public class AIWarrior : AIUnit {
 
 		int checkDirection = 1;
 		
-		if(attackDirection == AttackDirection.DOWN)
+		if(attackDirection == Direction.DOWN)
 			checkDirection = -1;
 		
 //		int y = curgsUnit.h + checkDirection;
@@ -116,17 +140,51 @@ public class AIWarrior : AIUnit {
 		defaultList[index].gsW = curgsUnit.w;
 
 		//First I get the possible moves
-		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
-			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
-				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
-					if(Mathf.Abs(i - curgsUnit.h) <= possibleMoves && Mathf.Abs(j - curgsUnit.w) <= possibleMoves) {
-						MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+//		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
+//			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+//				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+//					if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+//						MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+//
+//						index++;
+//
+//						defaultList[index].action = Action.MOVE;
+//						defaultList[index].gsH = i;
+//						defaultList[index].gsW = j;
+//					}
+//				}
+//			}
+//		}
 
-						index++;
-
-						defaultList[index].action = Action.MOVE;
-						defaultList[index].gsH = i;
-						defaultList[index].gsW = j;
+		if(moveDirection == Direction.DOWN) {
+			for(int i = curgsUnit.h; i < MCTS.Instance.gameState.GetLength(0); i++) {
+				for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+					if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+						if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+							MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+							
+							index++;
+							
+							defaultList[index].action = Action.MOVE;
+							defaultList[index].gsH = i;
+							defaultList[index].gsW = j;
+						}
+					}
+				}
+			}
+		} else {
+			for(int i = curgsUnit.h; i >= 0; i--) {
+				for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+					if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+						if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+							MCTS.Instance.gameState[i,j].state = AIGameFlow.GS_MOVE;
+							
+							index++;
+							
+							defaultList[index].action = Action.MOVE;
+							defaultList[index].gsH = i;
+							defaultList[index].gsW = j;
+						}
 					}
 				}
 			}
@@ -134,7 +192,7 @@ public class AIWarrior : AIUnit {
 
 		int checkDirection = 1;
 		
-		if(attackDirection == AttackDirection.DOWN)
+		if(attackDirection == Direction.DOWN)
 			checkDirection = -1;
 
 		//Then I get the possible attacks
@@ -214,12 +272,14 @@ public class AIWarrior : AIUnit {
 	public override AIUnit Copy (GameStateUnit unit) {
 
 		AIWarrior nWar = new AIWarrior();
-		nWar.possibleMoves = this.possibleMoves;
+		nWar.possibleMovesStraight = this.possibleMovesStraight;
+		nWar.possibleMovesStrafe = this.possibleMovesStrafe;
 		nWar.attackRange = this.attackRange;
 		nWar.health = this.health;
 		nWar.damage = this.damage;
 		nWar.possibleTarget = this.possibleTarget;
 		nWar.attackDirection = this.attackDirection;
+		nWar.moveDirection = this.moveDirection;
 
 		nWar.curgsUnit = unit;
 

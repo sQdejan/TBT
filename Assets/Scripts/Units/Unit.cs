@@ -2,25 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public enum ClassType {WARRIOR, RANGED};
-public enum AttackDirection {DOWN, UP};
+public enum ClassType {WARRIOR, RANGED, RUNNER};
+public enum Direction {DOWN, UP};
 
 public abstract class Unit : MonoBehaviour {
 
 	public ClassType classType;
-	public AttackDirection attackDirection;
+	public Direction attackDirection;
+	public Direction moveDirection;
 
-	public int possibleMoves;
+	public int possibleMovesStraight;
+	public int possibleMovesStrafe;
 	public int attackRange;
 	public int health;
 	public int damage;
 
-	public Color changeSpriteColor;
+	public Vector3 spritePosUp;
+	public Vector3 spritePosDown;
+
+	public GameObject spriteChild;
+
+	public Color activeSpriteColor;
 	public Color damageSpriteColor;
 	[HideInInspector] public Color oriSpriteColor;
 
-//	public Sprite originalSprite;
-//	public Sprite hoverSprite;
+	public Sprite upSprite;
+	public Sprite downSprite;
 
 	//The tile that will be moved to, in order to attack. I need this variable in order to reset the sprite if not
 	//hovered above anymore. It can be static because only one unit will be active at any given time
@@ -28,12 +35,13 @@ public abstract class Unit : MonoBehaviour {
 
 	//I need this in order to reset it's stats once a Unit is moving
 	[HideInInspector] public GameObject curTile;
-	
+
 	#region Methods to be overridden
 
-	public abstract bool IsAttackPossible(GameObject obj);
-
+	public abstract void ShowPossibleMoves();
 	public abstract void Attack(GameObject moveToObj, GameObject attackObj);
+	public abstract bool IsAttackPossible(GameObject obj);
+	protected abstract void ChangeDirection(GameObject nextTile);
 
 	#endregion
 
@@ -50,19 +58,20 @@ public abstract class Unit : MonoBehaviour {
 		}
 
 		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
-		transform.GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
+		GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
 	}
 
-	//Shared and implemented functionality for Move, ShowPossibleMoves and Death
 	public void Move (GameObject nextTile) {
-		
+
+		ChangeDirection(nextTile);
+
 		curTile.GetComponent<Tile>().occupied = false;
 		curTile.GetComponent<Tile>().occupier = null;
 
 		StartCoroutine(SlidingMove(nextTile.transform.position));
 		curTile = nextTile;
 
-		transform.GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
+		GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
 
 		curTile.GetComponent<Tile>().occupied = true;
 		curTile.GetComponent<Tile>().available = false;
@@ -80,25 +89,6 @@ public abstract class Unit : MonoBehaviour {
 			time += Time.fixedDeltaTime;
 			yield return new WaitForFixedUpdate();
 		}
-	}
-
-	//Show possible moves on the grid
-	public void ShowPossibleMoves() {
-
-		int curUnitHeightInd = curTile.GetComponent<Tile>().HeightIndex;
-		int curUnitWidthInd = curTile.GetComponent<Tile>().WidthIndex;
-		
-		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
-			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
-				if(!GridController.Instance.tileArray[i,j].occupied || GridController.Instance.tileArray[i,j].occupier.Equals(this.gameObject)) {
-					if(Mathf.Abs(j - curUnitWidthInd) <= possibleMoves && Mathf.Abs(i - curUnitHeightInd) <= possibleMoves) {
-						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
-						GridController.Instance.tileArray[i,j].available = true;
-					}
-				}
-			}
-		}
-
 	}
 
 	public void TakeDamage(int damage) {

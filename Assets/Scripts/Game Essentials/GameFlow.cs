@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -26,7 +26,11 @@ public class GameFlow : MonoBehaviour {
 	public Text turnDisplayer;
 
 	public static bool playersCurrentTurn = false;
-	public static MCTSNode playerLastMove = new MCTSNode(null, Action.ATTACK, -1, -1, -1, -1);
+
+	//The two following variables are used in order to save what is on the curren tree
+	//to use the statistics for further simulation in MCTS
+	public static bool didPlayerHaveATurn = false;
+	public static List<MCTSNode> playerLastMoveList = new List<MCTSNode>();
 
 	private List<GameObject> unitTurnOrderList = new List<GameObject>(); 
 	private int curTurnIndex = -1;
@@ -85,16 +89,18 @@ public class GameFlow : MonoBehaviour {
 		if(tmpObject.tag == "PlayerUnit") {
 			PlayerController.Instance.currentUnit = tmpObject;
 			//Show what unit is the current active
-			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().changeSpriteColor;
+			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
 			//Show posssible moves
 			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+			//Used in MCTS
+			didPlayerHaveATurn = true;
 
 			return true;
 		} else {
 			//AI shashizzle in here
 			Debug.Log("Starting the process");
 
-			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().changeSpriteColor;
+			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 
 			AIGameFlow.Instance.SetupGameState();
@@ -165,25 +171,19 @@ public class GameFlow : MonoBehaviour {
 			curUnit.Move(GridController.Instance.gridArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW]);
 		} else if (AIGameFlow.move.action == Action.ATTACK) {
 			Debug.Log("I attack");
-//			if(AIGameFlow.move.mbagsH == -1)
-//				curUnit.Attack(null, GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
-//			else 
-				curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
+			curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
 		}
 
 		unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
 		GridController.Instance.ClearGrid();
 
 		AIGameFlow.finished = false;
+		playerLastMoveList.Clear();
 		EndTurn();
 	}
 
 	public void SetPlayerLastMove(Action a, int mh, int mw, int h, int w) {
-		playerLastMove.action = a;
-		playerLastMove.mbagsH = mh;
-		playerLastMove.mbagsH = mw;
-		playerLastMove.gsH = h;
-		playerLastMove.gsW = w;
+		playerLastMoveList.Add(new MCTSNode(null, a, mh, mw, h, w));
 	}
 
 	public void RestartGame() {

@@ -35,12 +35,14 @@ public class MCTS : MonoBehaviour {
 	
 	List<MCTSNode> defaultList = new List<MCTSNode>(); //Used for optimising default
 
-
 	//For testing/debugging
 	int highestIndex = 0;
 	long maxIndex = 0;
 	int totalcalls = 0;
 	int maxChildIndex = 0;
+
+	long totalTime = 0;
+	Stopwatch test = new Stopwatch();
 
 	void Start() {
 		instance = this;
@@ -48,7 +50,6 @@ public class MCTS : MonoBehaviour {
 		for(int i = 0; i < 50; i++) {
 			defaultList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, 1, 1));
 		}
-
 	}
 
 	public void StartProcess(object sender, DoWorkEventArgs e) {
@@ -66,12 +67,30 @@ public class MCTS : MonoBehaviour {
 			return false;
 		}
 
-		foreach(MCTSNode node in currentNode.children) {
-			if(node.Equals(GameFlow.playerLastMove)) {
-				rootNode = node;
-				UnityEngine.Debug.Log("I found a new rootnode and is has childs " + node.children.Count + " and reach index " + node.curChildIndex);
-				return true;
+		//If the player did not have the turn we can just continue from
+		//the current node
+		if(!GameFlow.didPlayerHaveATurn) {
+			rootNode = currentNode;
+			rootNode.parent = null;
+			return true;
+		} else {
+			GameFlow.didPlayerHaveATurn = false;
+		}
+
+		foreach(MCTSNode n in GameFlow.playerLastMoveList) {
+			bool match = false;
+
+			foreach(MCTSNode node in currentNode.children) {
+				if(node.Equals(n)) {
+					currentNode = node;
+					rootNode = currentNode;
+					rootNode.parent = null;
+					return true;
+				}
 			}
+
+			if(!match)
+				break;
 		}
 
 		return false;
@@ -81,10 +100,11 @@ public class MCTS : MonoBehaviour {
 
 		highestIndex = 0;
 		maxIndex = 0;
-		totalcalls = 0;
+		totalcalls = 0;	
 		maxChildIndex = 0;
 
 		if (!UpdateRootNode()) {
+			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
 			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
 		}
 
@@ -109,18 +129,21 @@ public class MCTS : MonoBehaviour {
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 		int i = 0;
-		totalcalls = 0;
-		while(sw.ElapsedMilliseconds < 5000) {
+
+		while(sw.ElapsedMilliseconds < 6000) {
 
 			if(worker.CancellationPending) {
 				e.Cancel = true;
 				break;
 			}
-
+//			test.Start();
 			TreePolicy();
 			float reward = DefaultPolicy();
 			BackPropagate(reward);
 			i++;
+//			test.Stop();
+//			totalTime = test.ElapsedMilliseconds;
+//			test.Reset();
 		}
 		sw.Stop();
 
@@ -138,6 +161,8 @@ public class MCTS : MonoBehaviour {
 		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
 		UnityEngine.Debug.Log("Cycles = " + i);
 
+		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
+
 		AIGameFlow.finished = true;
 	}
 
@@ -146,7 +171,6 @@ public class MCTS : MonoBehaviour {
 	/// if needed.
 	/// </summary>
 	void TreePolicy() {
-
 		gameState = AIGameFlow.Instance.GetCopyOfGameState();
 		currentNode = rootNode;
 		int k = 0;
@@ -180,6 +204,7 @@ public class MCTS : MonoBehaviour {
 
 		//I need to consider if it's the AI or the Player's move
 		char curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
+
 		if(curTurn == AIGameFlow.GS_AI || C == 0) {
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
@@ -213,10 +238,7 @@ public class MCTS : MonoBehaviour {
 			if(currentNode.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
 			} else if(currentNode.action == Action.ATTACK) {
-//				if(currentNode.mbagsH == -1)
-//					AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
-//				else
-					AIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
+				AIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
 			}
 
 			AIGameFlow.Instance.StartNextTurn();
@@ -276,6 +298,7 @@ public class MCTS : MonoBehaviour {
 
 		while(result == -1) {
 			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
+
 
 			if(index > highestIndex)
 				highestIndex = index;

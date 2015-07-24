@@ -1,14 +1,16 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public abstract class AIUnit {
 
-	public int possibleMoves;
+	public int possibleMovesStraight;
+	public int possibleMovesStrafe;
 	public int attackRange;
 	public int health;
 	public int damage;
-	public AttackDirection attackDirection;
+	public Direction attackDirection;
+	public Direction moveDirection;
 
 	//If this for instance is a player unit it can attack AI and vice versa
 	public char possibleTarget;
@@ -37,6 +39,20 @@ public abstract class AIUnit {
 		curgsUnit.occupier = null;
 
 		curgsUnit = to;
+
+		ChangeDirection();
+	}
+
+	void ChangeDirection() {
+		
+		if(curgsUnit.h == MCTS.Instance.gameState.GetLength(0) - 1) {
+			moveDirection = Direction.UP;
+			attackDirection = Direction.UP;
+		} else if (curgsUnit.h == 0) {
+			moveDirection = Direction.DOWN;
+			attackDirection = Direction.DOWN;
+		}
+		
 	}
 
 	public void TakeDamage (int damage) {

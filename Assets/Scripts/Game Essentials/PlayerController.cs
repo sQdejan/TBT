@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviour {
 		layerEnemy = 1 << LayerMask.NameToLayer("Enemy");
 
 		tileSelObjPos = tileSelectorObject.transform.position;
+
+//		currentUnit.GetComponent<Unit>().ShowPossibleMoves();
 	}
 	
 	void Update () {
@@ -74,17 +76,17 @@ public class PlayerController : MonoBehaviour {
 
 		if(enemyHit.collider != null) {
 			if(activeEnemy) {
-//				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+				//Change sprite color back to original
 			}
 
 			activeEnemy = enemyHit.collider.gameObject;
-//			activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().hoverSprite;
+			//I would like to change the color of the sprite on the enemy if possible
 			foundEnemy = true;
 
 			cursorState = CursorState.ATTACK;
 		} else {
 			if(activeEnemy) {
-//				activeEnemy.GetComponent<SpriteRenderer>().sprite = activeEnemy.GetComponent<Unit>().originalSprite;
+				//Change sprite color back to original
 				activeEnemy = null;
 			}
 		}
@@ -120,11 +122,6 @@ public class PlayerController : MonoBehaviour {
 		
 		if(tileHit.collider != null) {
 			activeTile = tileHit.collider.gameObject;
-
-//			if(activeTile.GetComponent<Tile>().occupied) {
-//				cursorState = CursorState.NOMOVE;
-//				return;
-//			}
 
 			if(!activeTile.GetComponent<Tile>().available) {
 				cursorState = CursorState.NOMOVE;	
@@ -183,7 +180,7 @@ public class PlayerController : MonoBehaviour {
 		
 		//Just reset sprites
 		if(activeEnemy) {
-//			activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponentInChildren<Unit>().oriSpriteColor;
+			//Change sprite color back to original
 			activeEnemy = null;
 		}
 
@@ -193,6 +190,8 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		cursorState = CursorState.NORMAL;
+
+//		currentUnit.GetComponent<Unit>().ShowPossibleMoves();
 
 		GameFlow.Instance.EndTurn();
 	}

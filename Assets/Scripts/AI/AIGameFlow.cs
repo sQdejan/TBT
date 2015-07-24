@@ -27,8 +27,6 @@ public class AIGameFlow : MonoBehaviour {
 	public const char GS_MOVE = 'M';
 	public const char GS_AI = 'A';
 
-	[HideInInspector] public int height, width;
-
 	public static AIUnit activeUnit;
 	public static bool finished = false;
 	public static int cycles = 0;
@@ -37,7 +35,9 @@ public class AIGameFlow : MonoBehaviour {
 
 	public List<AIUnit> turnOrderList;
 	[HideInInspector] public int curTurnOrderIndex;
-	
+
+	int height, width;
+
 	GameStateUnit[,] gameState;
 	GameStateUnit[] turnOrderArray;	//A static version of the initial turn order, used to create the dynamic list above (turnOrderList)
 
@@ -98,6 +98,7 @@ public class AIGameFlow : MonoBehaviour {
 			}
 		}
 
+		//Delegate the methods needed and start a thread
 		MCTSBackgroundWorker = new BackgroundWorker();
 
 		MCTSBackgroundWorker.WorkerSupportsCancellation = true;
@@ -125,11 +126,25 @@ public class AIGameFlow : MonoBehaviour {
 	}
 
 	void CopyStats(Unit from, AIUnit to) {
-		to.possibleMoves = from.possibleMoves;
+		to.possibleMovesStraight = from.possibleMovesStraight;
+		to.possibleMovesStrafe = from.possibleMovesStrafe;
 		to.attackRange = from.attackRange;
 		to.health = from.health;
 		to.damage = from.damage;
 		to.attackDirection = from.attackDirection;
+		to.moveDirection = from.moveDirection;
+	}
+
+	//Need this when resetting the gamestate before each simulation
+	//same as above except it takes two AIUnits
+	void CopyStats(AIUnit from, AIUnit to) {
+		to.possibleMovesStraight = from.possibleMovesStraight;
+		to.possibleMovesStrafe = from.possibleMovesStrafe;
+		to.attackRange = from.attackRange;
+		to.health = from.health;
+		to.damage = from.damage;
+		to.attackDirection = from.attackDirection;
+		to.moveDirection = from.moveDirection;
 	}
 
 	#endregion
@@ -152,10 +167,17 @@ public class AIGameFlow : MonoBehaviour {
 	}
 
 	public void KillUnit(AIUnit unit) {
+
+		int tmpIndex = turnOrderList.IndexOf(unit);
+
+		if(tmpIndex >= turnOrderList.Count || tmpIndex < 0) {
+			PrintGameState(MCTS.Instance.gameState);
+			Debug.Log("I am killed by the unit " + unit.possibleTarget + " and I am " + unit.curgsUnit.state + " with h " + unit.curgsUnit.h + " and w " + unit.curgsUnit.w);
+		}
+
 		unit.curgsUnit.state = GS_EMPTY;
 		unit.curgsUnit.occupier = null;
-		int tmpIndex = turnOrderList.IndexOf(unit);
-		
+
 		if(tmpIndex < curTurnOrderIndex)
 			curTurnOrderIndex--;
 
@@ -244,7 +266,7 @@ public class AIGameFlow : MonoBehaviour {
 			for(int j = 0; j < gs.GetLength(1); j++) {
 				if(gs[i,j].state == GS_AI || gs[i,j].state == GS_PLAYER) {
 					Debug.Log("Health " + gs[i,j].occupier.health);
-					Debug.Log("Possible Moves " + gs[i,j].occupier.possibleMoves);
+					Debug.Log("Possible Moves Straight " + gs[i,j].occupier.possibleMovesStraight);
 					Debug.Log("Attack range " + gs[i,j].occupier.attackRange);
 					Debug.Log("Damage " + gs[i,j].occupier.damage);
 					Debug.Log("Possible target " + gs[i,j].occupier.possibleTarget);

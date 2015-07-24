@@ -58,6 +58,7 @@
      <Compile Include="Assets\Scripts\Game Essentials\Tile.cs" />
      <Compile Include="Assets\Scripts\Testing\UnitTest.cs" />
      <Compile Include="Assets\Scripts\Units\Ranger.cs" />
+     <Compile Include="Assets\Scripts\Units\Runner.cs" />
      <Compile Include="Assets\Scripts\Units\Unit.cs" />
      <Compile Include="Assets\Scripts\Units\Warrior.cs" />
      <None Include="Assets\Standard Assets\Effects\GlassRefraction\Shaders\GlassStainedBumpDistort.shader" />

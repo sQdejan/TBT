@@ -1,18 +1,14 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AIUnit/AIRanger.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game Essentials/PlayerController.cs">
     <Files>
-      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="168" Column="5" />
-      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="286" Column="1" />
-      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="161" Column="1" />
-      <File FileName="Assets/Scripts/AI/MCTSNode.cs" Line="38" Column="1" />
-      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="146" Column="1" />
-      <File FileName="Assets/Scripts/Units/Warrior.cs" Line="99" Column="1" />
-      <File FileName="Assets/Scripts/Units/Unit.cs" Line="54" Column="1" />
-      <File FileName="Assets/Scripts/AIUnit/AIRanger.cs" Line="9" Column="1" />
-      <File FileName="Assets/Scripts/AIUnit/AIWarrior.cs" Line="12" Column="1" />
-      <File FileName="Assets/Scripts/AIUnit/AIUnit.cs" Line="45" Column="1" />
-      <File FileName="Assets/Scripts/Units/Ranger.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Units/Unit.cs" Line="21" Column="31" />
+      <File FileName="Assets/Scripts/Units/Runner.cs" Line="17" Column="3" />
+      <File FileName="Assets/Scripts/Units/Ranger.cs" Line="18" Column="7" />
+      <File FileName="Assets/Scripts/Units/Warrior.cs" Line="134" Column="35" />
+      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="33" Column="9" />
+      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="133" Column="38" />
+      <File FileName="Assets/Scripts/AIUnit/AIRanger.cs" Line="16" Column="35" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
