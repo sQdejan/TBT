@@ -55,4 +55,10 @@ public class Runner : Unit {
 
 	protected override void ChangeDirection (GameObject nextTile) {
 	}
+
+	//------------------------------- For testing ------------------------------
+	public override void AttacksForAutomation (System.Collections.Generic.List<MCTSNode> list, GameObject ene) {
+		throw new System.NotImplementedException ();
+	}
+	//---------------------------- Testing end ------------------
 }

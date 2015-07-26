@@ -173,6 +173,7 @@ public class AIGameFlow : MonoBehaviour {
 		if(tmpIndex >= turnOrderList.Count || tmpIndex < 0) {
 			PrintGameState(MCTS.Instance.gameState);
 			Debug.Log("I am killed by the unit " + unit.possibleTarget + " and I am " + unit.curgsUnit.state + " with h " + unit.curgsUnit.h + " and w " + unit.curgsUnit.w);
+			Debug.Log("and turnorder count is = " + turnOrderList.Count);
 		}
 
 		unit.curgsUnit.state = GS_EMPTY;

@@ -98,7 +98,7 @@ public class GameFlow : MonoBehaviour {
 			return true;
 		} else {
 			//AI shashizzle in here
-			Debug.Log("Starting the process");
+//			Debug.Log("Starting the process");
 
 			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
@@ -149,6 +149,8 @@ public class GameFlow : MonoBehaviour {
 		else
 			Debug.Log("You won, nice!");
 
+//		RestartGame();
+
 		return true;
 	}
 
@@ -162,15 +164,15 @@ public class GameFlow : MonoBehaviour {
 
 	public void MoveHasBeenCalculated() {
 
-		Debug.Log("Applying move");
+//		Debug.Log("Applying move");
 
 		Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
 
 		if(AIGameFlow.move.action == Action.MOVE) {
-			Debug.Log("I move");
+//			Debug.Log("I move");
 			curUnit.Move(GridController.Instance.gridArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW]);
 		} else if (AIGameFlow.move.action == Action.ATTACK) {
-			Debug.Log("I attack");
+//			Debug.Log("I attack");
 			curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
 		}
 
@@ -179,6 +181,7 @@ public class GameFlow : MonoBehaviour {
 
 		AIGameFlow.finished = false;
 		playerLastMoveList.Clear();
+
 		EndTurn();
 	}
 
@@ -186,8 +189,11 @@ public class GameFlow : MonoBehaviour {
 		playerLastMoveList.Add(new MCTSNode(null, a, mh, mw, h, w));
 	}
 
+	static int gamesplayed = 0;
+
 	public void RestartGame() {
 //		AIGameFlow.Instance.CancelBackgroundWorker();
+		Debug.Log("GAMES PLAYED = " + (++gamesplayed));
 		Application.LoadLevel(Application.loadedLevel);
 	}
 

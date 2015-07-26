@@ -5,6 +5,11 @@ using System.Collections.Generic;
 public class AIRanger : AIUnit {
 
 	public override void Attack (GameStateUnit moveTo, GameStateUnit attack) {
+
+		if(attack.state == AIGameFlow.GS_EMPTY) {
+			Debug.Log("It's empty and shouldn't be - is the occupier null as well? " + (attack.occupier == null));
+		}
+
 		attack.occupier.TakeDamage(damage);
 	}
 
@@ -43,8 +48,7 @@ public class AIRanger : AIUnit {
 		//first I check up/down
 		int y = curgsUnit.h;
 		//up
-		while(y < MCTS.Instance.gameState.GetLength(0) - 1) {
-			y++;
+		while(++y < MCTS.Instance.gameState.GetLength(0)) {
 
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
 				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, y, curgsUnit.w));
@@ -56,9 +60,8 @@ public class AIRanger : AIUnit {
 
 		y = curgsUnit.h;
 		//down
-		while(y > 0) {
-			y--;
-			
+		while(--y >= 0) {
+
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
 				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, y, curgsUnit.w));
 				break;
@@ -69,8 +72,7 @@ public class AIRanger : AIUnit {
 
 		int x = curgsUnit.w;
 		//right
-		while(x < MCTS.Instance.gameState.GetLength(1) - 1) {
-			x++;
+		while(++x < MCTS.Instance.gameState.GetLength(1)) {
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
 				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, curgsUnit.h, x));
@@ -82,8 +84,7 @@ public class AIRanger : AIUnit {
 
 		x = curgsUnit.w;
 		//left
-		while(x > 0) {
-			x--;
+		while(--x >= 0) {
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
 				rList.Add(new MCTSNode(parent, Action.ATTACK, 1, 1, curgsUnit.h, x));
@@ -144,9 +145,7 @@ public class AIRanger : AIUnit {
 		//first I check up/down
 		int y = curgsUnit.h;
 		//up
-		while(y < MCTS.Instance.gameState.GetLength(0) - 1) {
-			y++;
-			
+		while(++y < MCTS.Instance.gameState.GetLength(0)) {
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
 
 				index++;
@@ -165,8 +164,7 @@ public class AIRanger : AIUnit {
 		
 		y = curgsUnit.h;
 		//down
-		while(y > 0) {
-			y--;
+		while(--y >= 0) {
 			
 			if(MCTS.Instance.gameState[y, curgsUnit.w].state == possibleTarget) {
 
@@ -186,8 +184,7 @@ public class AIRanger : AIUnit {
 		
 		int x = curgsUnit.w;
 		//right
-		while(x < MCTS.Instance.gameState.GetLength(1) - 1) {
-			x++;
+		while(++x < MCTS.Instance.gameState.GetLength(1)) {
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
 
@@ -207,8 +204,7 @@ public class AIRanger : AIUnit {
 		
 		x = curgsUnit.w;
 		//left
-		while(x > 0) {
-			x--;
+		while(--x >= 0) {
 			
 			if(MCTS.Instance.gameState[curgsUnit.h, x].state == possibleTarget) {
 

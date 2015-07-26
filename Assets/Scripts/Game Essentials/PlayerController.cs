@@ -49,7 +49,14 @@ public class PlayerController : MonoBehaviour {
 
 		tileSelObjPos = tileSelectorObject.transform.position;
 
-//		currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+//		StartCoroutine(DelayedStart());
+	}
+
+	//Only for testing
+	IEnumerator DelayedStart() {
+		yield return new WaitForSeconds(0.5f);
+
+		currentUnit.GetComponent<Unit>().ShowPossibleMoves();
 	}
 	
 	void Update () {
@@ -76,17 +83,20 @@ public class PlayerController : MonoBehaviour {
 
 		if(enemyHit.collider != null) {
 			if(activeEnemy) {
-				//Change sprite color back to original
+				if(activeEnemy.GetComponentInChildren<SpriteRenderer>())
+					activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponent<Unit>().oriSpriteColor;
 			}
 
 			activeEnemy = enemyHit.collider.gameObject;
-			//I would like to change the color of the sprite on the enemy if possible
+			if(activeEnemy.GetComponentInChildren<SpriteRenderer>())
+				activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponent<Unit>().activeSpriteColor;
 			foundEnemy = true;
 
 			cursorState = CursorState.ATTACK;
 		} else {
 			if(activeEnemy) {
-				//Change sprite color back to original
+				if(activeEnemy.GetComponentInChildren<SpriteRenderer>())
+					activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponent<Unit>().oriSpriteColor;
 				activeEnemy = null;
 			}
 		}
@@ -146,6 +156,40 @@ public class PlayerController : MonoBehaviour {
 			currentUnit.GetComponent<Unit>().Move(activeTile);
 			EndTurn();
 		} 
+
+		//Just taking an automatic random move for testing purposes ------------------------------------------ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --------------------------------------
+
+//		List<MCTSNode> poss = new List<MCTSNode>();
+//
+//		//possible moves
+//		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+//			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+//				if(GridController.Instance.tileArray[i,j].available) { 
+//					poss.Add(new MCTSNode(null, Action.MOVE, 1, 1, i, j));
+//				}
+//			}
+//		}
+//
+//		//possible attacks - if any attacks available I remove the "moves" inside the function and only send back attacks
+//		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+//			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+//				if(GridController.Instance.tileArray[i,j].occupied && GridController.Instance.tileArray[i,j].occupier.tag == "EnemyUnit") { 
+//					currentUnit.GetComponent<Unit>().AttacksForAutomation(poss, GridController.Instance.tileArray[i,j].occupier);
+//				}
+//			}
+//		}
+//
+//		MCTSNode n = poss[Random.Range(0, poss.Count - 1)]; 
+//
+//		if(n.action == Action.MOVE)
+//			currentUnit.GetComponent<Unit>().Move(GridController.Instance.gridArray[n.gsH,n.gsW]);
+//		else {
+//			currentUnit.GetComponent<Unit>().Attack(GridController.Instance.gridArray[n.mbagsH,n.mbagsW], GridController.Instance.tileArray[n.gsH, n.gsW].occupier);
+//		}
+//
+//		EndTurn();
+
+		//Tiilllll here ------------------------------------------------------------------------
 	}
 
 	void CursorIcon() {
@@ -180,7 +224,8 @@ public class PlayerController : MonoBehaviour {
 		
 		//Just reset sprites
 		if(activeEnemy) {
-			//Change sprite color back to original
+			if(activeEnemy.GetComponentInChildren<SpriteRenderer>())
+				activeEnemy.GetComponentInChildren<SpriteRenderer>().color = activeEnemy.GetComponent<Unit>().oriSpriteColor;
 			activeEnemy = null;
 		}
 

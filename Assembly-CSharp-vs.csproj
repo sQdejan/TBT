@@ -56,6 +56,7 @@
      <Compile Include="Assets\Scripts\Game Essentials\GridController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\Tile.cs" />
+     <Compile Include="Assets\Scripts\Testing\AnimationTest.cs" />
      <Compile Include="Assets\Scripts\Testing\UnitTest.cs" />
      <Compile Include="Assets\Scripts\Units\Ranger.cs" />
      <Compile Include="Assets\Scripts\Units\Runner.cs" />

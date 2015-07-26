@@ -42,7 +42,6 @@ public class Warrior : Unit {
 	
 	public override void Attack (GameObject moveToObj, GameObject attackObj) {
 
-
 		//Move the obj in order to attack, if moveToObj is not null
 		//it means that the attack is done by the AI
 		if(moveToObj)
@@ -72,20 +71,40 @@ public class Warrior : Unit {
 		return false;
 	}
 
+	Vector3[] twoDistanceVectors = new Vector3[2];
+	Vector3[] threeDistanceVectors = new Vector3[3];
+
 	GameObject ClosestTile(GameObject obj) {
 
 		List<GameObject> listGameobject = AvailableTiles(obj);
 
 		if(listGameobject.Count == 0) 
 			return null;
+		else if(listGameobject.Count == 1)
+			return listGameobject[0];
 
 		float shortestDistance = float.MaxValue;
 		GameObject shortestDistanceObj = null;
 
+		Vector3[] distanceVectors = null;
+
+		//This is ugly but to avoid the NEW keyword all the time
+		if(listGameobject.Count == 2) {
+			twoDistanceVectors[0] = obj.transform.position + (((-Vector3.up - Vector3.right) * 0.38f));
+			twoDistanceVectors[1] = obj.transform.position + (((Vector3.up + Vector3.right) * 0.38f));
+			distanceVectors = twoDistanceVectors;
+		} else if(listGameobject.Count == 3) {
+			threeDistanceVectors[0] = obj.transform.position + (((-Vector3.up - Vector3.right) * 0.2f));
+			threeDistanceVectors[1] = obj.transform.position;
+			threeDistanceVectors[2] = obj.transform.position + (((Vector3.up + Vector3.right) * 0.2f));
+			distanceVectors = threeDistanceVectors;
+		}
+
+		int index = 0;
 		//Just looking at the distance to the mouse
 		foreach(GameObject o in listGameobject) {
 				
-			float tmpValue = Vector2.Distance(o.transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition));
+			float tmpValue = Vector2.Distance(distanceVectors[index++], Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
 			if(tmpValue < shortestDistance) {
 				shortestDistance = tmpValue;
@@ -139,4 +158,43 @@ public class Warrior : Unit {
 			attackDirection = Direction.DOWN;
 		}
 	}
+
+
+	//------------------------------- For testing ------------------------------
+	public override void AttacksForAutomation (List<MCTSNode> list, GameObject ene) {
+
+		List<MCTSNode> tmpList = new List<MCTSNode>();
+
+		Tile enemyUnitTile = ene.GetComponent<Unit>().curTile.GetComponent<Tile>();
+		
+		int tmpHeight = enemyUnitTile.HeightIndex;
+		int tmpWidth = enemyUnitTile.WidthIndex;
+		
+		int checkDirection = 1;
+		
+		if(attackDirection == Direction.DOWN)
+			checkDirection = -1;
+		
+		int y = tmpHeight + checkDirection;
+		
+		if(y >= 0 && y < GridController.Instance.gridHeight) {
+			for(int i = -attackRange; i <= attackRange; i++) {
+				int x = tmpWidth + i;
+				if(x >= 0 && x < GridController.Instance.gridWidth) {
+					if(GridController.Instance.tileArray[y,x].available) {
+						tmpList.Add(new MCTSNode(null, Action.ATTACK, y, x, tmpHeight, tmpWidth));
+					}
+				}
+			}
+		}
+
+		if(tmpList.Count > 0) {
+			list.Clear();
+			foreach(MCTSNode node in tmpList) {
+				list.Add(node);
+			}
+		}
+	}
+
+	//---------------------------- Testing end ------------------
 }

@@ -43,6 +43,10 @@ public abstract class Unit : MonoBehaviour {
 	public abstract bool IsAttackPossible(GameObject obj);
 	protected abstract void ChangeDirection(GameObject nextTile);
 
+	//------------------------------- For testing ------------------------------
+	public abstract void AttacksForAutomation(List<MCTSNode> list, GameObject ene); 
+	//------------------------------- Testing End ------------------------------
+
 	#endregion
 
 	void Start() {
@@ -68,14 +72,14 @@ public abstract class Unit : MonoBehaviour {
 		curTile.GetComponent<Tile>().occupied = false;
 		curTile.GetComponent<Tile>().occupier = null;
 
-		StartCoroutine(SlidingMove(nextTile.transform.position));
 		curTile = nextTile;
-
-		GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
 
 		curTile.GetComponent<Tile>().occupied = true;
 		curTile.GetComponent<Tile>().available = false;
 		curTile.GetComponent<Tile>().occupier = gameObject;
+
+		StartCoroutine(SlidingMove(nextTile.transform.position));
+		GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
 
 		attackMoveTile = null;
 	}
@@ -87,8 +91,10 @@ public abstract class Unit : MonoBehaviour {
 		while(time < travelTime) {
 			transform.position = Vector3.Lerp(transform.position, pos, time/travelTime);
 			time += Time.fixedDeltaTime;
+
 			yield return new WaitForFixedUpdate();
 		}
+
 	}
 
 	public void TakeDamage(int damage) {
@@ -123,5 +129,11 @@ public abstract class Unit : MonoBehaviour {
 		GameFlow.Instance.KillUnit(gameObject);
 		curTile.GetComponent<Tile>().occupied = false;
 		gameObject.SetActive(false);
+	}
+
+	//I seriously need to consider this
+	void OnGUI() {
+		Vector3 pos = Camera.main.WorldToScreenPoint(spriteChild.transform.position);
+		GUI.Label(new Rect(pos.x, Screen.height - pos.y - (Screen.height / 12), 15, 20), health.ToString());
 	}
 }

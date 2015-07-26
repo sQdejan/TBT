@@ -22,7 +22,8 @@ public class MCTS : MonoBehaviour {
 	}
 	
 #endregion
-	
+
+	const long RUN_TIME = 5000;
 
 	public GameStateUnit[,] gameState;
 
@@ -102,35 +103,18 @@ public class MCTS : MonoBehaviour {
 		maxIndex = 0;
 		totalcalls = 0;	
 		maxChildIndex = 0;
+		totalTime = 0;
 
 		if (!UpdateRootNode()) {
-			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
+//			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
 			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
 		}
-
-//		rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0); 
-
-		//A while loop will run here
-//		int index = 0;
-//
-//		while (index < 100) {
-//			TreePolicy();
-//			float reward = DefaultPolicy();
-//			BackPropagate(reward);
-//			index++;
-//		}
-//
-//		UnityEngine.Debug.Log("Donski");
-//		currentNode = rootNode;
-//		BestChild(0);
-//		AIGameFlow.move = currentNode;
-//		AIGameFlow.finished = true;
 
 		Stopwatch sw = new Stopwatch();
 		sw.Start();
 		int i = 0;
 
-		while(sw.ElapsedMilliseconds < 6000) {
+		while(sw.ElapsedMilliseconds < RUN_TIME) {
 
 			if(worker.CancellationPending) {
 				e.Cancel = true;
@@ -142,7 +126,7 @@ public class MCTS : MonoBehaviour {
 			BackPropagate(reward);
 			i++;
 //			test.Stop();
-//			totalTime = test.ElapsedMilliseconds;
+//			totalTime += test.ElapsedMilliseconds;
 //			test.Reset();
 		}
 		sw.Stop();
@@ -152,16 +136,16 @@ public class MCTS : MonoBehaviour {
 		BestChild(0);
 		AIGameFlow.move = currentNode;
 
-		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
-		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
-		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
-
-		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
-
-		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
-		UnityEngine.Debug.Log("Cycles = " + i);
-
-		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
+//		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
+//		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
+//		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
+//
+//		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
+//
+//		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
+//		UnityEngine.Debug.Log("Cycles = " + i);
+//
+//		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
 
 		AIGameFlow.finished = true;
 	}
@@ -205,6 +189,8 @@ public class MCTS : MonoBehaviour {
 		//I need to consider if it's the AI or the Player's move
 		char curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
 
+		List<UCTValueHolder> UCTValues = new List<UCTValueHolder>();
+
 		if(curTurn == AIGameFlow.GS_AI || C == 0) {
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
@@ -214,17 +200,45 @@ public class MCTS : MonoBehaviour {
 					bestIndex = i;
 				}
 			}
+
+			UCTValues.Add(new UCTValueHolder(bestIndex, bestScore));
+
+			//Find those that are equal in order to take a random decision
+			for(int i = 0; i < currentNode.children.Count; i++) {
+				if(i != UCTValues[0].index) {
+					float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
+					if(tmpUCTValue == UCTValues[0].UCTValue)
+						UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
+				}
+			}
+
+			bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
+
 		} else if (curTurn == AIGameFlow.GS_PLAYER) {
 			bestScore = float.MaxValue;
 			
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				float tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
-				
+
 				if(tmpUCTValue < bestScore) {
 					bestScore = tmpUCTValue;
 					bestIndex = i;
 				}
 			}
+
+			UCTValues.Add(new UCTValueHolder(bestIndex, bestScore));
+			
+			//Find those that are equal in order to take a random decision
+			for(int i = 0; i < currentNode.children.Count; i++) {
+				if(i != UCTValues[0].index) {
+					float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
+					if(tmpUCTValue == UCTValues[0].UCTValue)
+						UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
+				}
+			}
+			
+			bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
+
 		} else {
 			UnityEngine.Debug.Log("I should never ever be here!!");
 		}
@@ -299,7 +313,6 @@ public class MCTS : MonoBehaviour {
 		while(result == -1) {
 			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
 
-
 			if(index > highestIndex)
 				highestIndex = index;
 
@@ -310,11 +323,7 @@ public class MCTS : MonoBehaviour {
 			if(action.action == Action.MOVE) {
 				AIGameFlow.activeUnit.Move(gameState[action.gsH, action.gsW]);
 			} else if(action.action == Action.ATTACK) {
-//				if(action.mbagsH == -1) {
-//					AIGameFlow.activeUnit.Attack(null, gameState[action.gsH, action.gsW]);
-//				} else {
-					AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
-//				}
+				AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
 
 			totalcalls++;
@@ -348,5 +357,14 @@ public class MCTS : MonoBehaviour {
 			currentNode = currentNode.parent;
 		}
 	}
+}
 
+class UCTValueHolder {
+	public int index;
+	public float UCTValue;
+
+	public UCTValueHolder(int index, float UCTValue) {
+		this.index = index;
+		this.UCTValue = UCTValue;
+	}
 }
