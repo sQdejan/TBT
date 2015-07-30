@@ -78,15 +78,19 @@ public class MCTS : MonoBehaviour {
 			GameFlow.didPlayerHaveATurn = false;
 		}
 
+		UnityEngine.Debug.Log("------");
+		bool match = false;
+
 		foreach(MCTSNode n in GameFlow.playerLastMoveList) {
-			bool match = false;
+			match = false;
 
 			foreach(MCTSNode node in currentNode.children) {
 				if(node.Equals(n)) {
+					UnityEngine.Debug.Log("MATCH MATCH");
 					currentNode = node;
 					rootNode = currentNode;
 					rootNode.parent = null;
-					return true;
+					match = true;
 				}
 			}
 
@@ -94,7 +98,10 @@ public class MCTS : MonoBehaviour {
 				break;
 		}
 
-		return false;
+		if(match)
+			return true;
+		else 
+			return false;
 	}
 
 	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
@@ -106,7 +113,7 @@ public class MCTS : MonoBehaviour {
 		totalTime = 0;
 
 		if (!UpdateRootNode()) {
-//			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
+			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
 			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
 		}
 

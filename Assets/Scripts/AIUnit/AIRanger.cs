@@ -10,6 +10,8 @@ public class AIRanger : AIUnit {
 			Debug.Log("It's empty and shouldn't be - is the occupier null as well? " + (attack.occupier == null));
 		}
 
+		AIGameFlow.uknow = "I am myself at state " + curgsUnit.state + " with h, w " + curgsUnit.h + ", " + curgsUnit.w + " - the one I attack has the state " + attack.state + " with h, w " + attack.h + ", " + attack.w;
+
 		attack.occupier.TakeDamage(damage);
 	}
 

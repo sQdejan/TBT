@@ -166,12 +166,16 @@ public class AIGameFlow : MonoBehaviour {
 		return isGameOver;
 	}
 
+	public static string uknow = "";
+
 	public void KillUnit(AIUnit unit) {
 
 		int tmpIndex = turnOrderList.IndexOf(unit);
 
 		if(tmpIndex >= turnOrderList.Count || tmpIndex < 0) {
 			PrintGameState(MCTS.Instance.gameState);
+			Debug.Log("From AIRanger I get this: ");
+			Debug.Log(AIGameFlow.uknow);
 			Debug.Log("I am killed by the unit " + unit.possibleTarget + " and I am " + unit.curgsUnit.state + " with h " + unit.curgsUnit.h + " and w " + unit.curgsUnit.w);
 			Debug.Log("and turnorder count is = " + turnOrderList.Count);
 		}

@@ -107,7 +107,8 @@ public class PlayerController : MonoBehaviour {
 			//Setting the move that the player is taking in order to help the MCTS
 			Tile actEne = activeEnemy.GetComponent<Unit>().curTile.GetComponent<Tile>();
 			if(Unit.attackMoveTile == null) {
-				GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, -1, -1, actEne.HeightIndex, actEne.WidthIndex);
+				Tile curUnitTile = currentUnit.GetComponent<Unit>().curTile.GetComponent<Tile>();
+				GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, curUnitTile.HeightIndex, curUnitTile.WidthIndex, actEne.HeightIndex, actEne.WidthIndex);
 			} else {
 				Tile mTile = Unit.attackMoveTile.GetComponent<Tile>();
 				GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, mTile.HeightIndex, mTile.WidthIndex, actEne.HeightIndex, actEne.WidthIndex);
