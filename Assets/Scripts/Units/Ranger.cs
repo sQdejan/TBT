@@ -50,7 +50,7 @@ public class Ranger : Unit {
 		attackObj.GetComponent<Unit>().TakeDamage(damage);
 	}
 
-	//For this attack I check horizontally/diagonally if the enemy is in line of sight
+	//For this attack I check horizontally/vertically if the enemy is in line of sight
 	//and also if an "unit" is standing between this unit and the enemy. If so, it can't shoot
 	//through that target.
 	public override bool IsAttackPossible (GameObject obj) {

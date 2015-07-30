@@ -29,6 +29,8 @@ public abstract class Unit : MonoBehaviour {
 	public Sprite upSprite;
 	public Sprite downSprite;
 
+	public GUIStyle style = new GUIStyle();
+
 	//The tile that will be moved to, in order to attack. I need this variable in order to reset the sprite if not
 	//hovered above anymore. It can be static because only one unit will be active at any given time
 	public static GameObject attackMoveTile;
@@ -134,6 +136,6 @@ public abstract class Unit : MonoBehaviour {
 	//I seriously need to consider this
 	void OnGUI() {
 		Vector3 pos = Camera.main.WorldToScreenPoint(spriteChild.transform.position);
-		GUI.Label(new Rect(pos.x, Screen.height - pos.y - (Screen.height / 12), 15, 20), health.ToString());
+		GUI.Label(new Rect(pos.x, Screen.height - pos.y - (Screen.height / 12), 15, 20), health.ToString(), style);
 	}
 }

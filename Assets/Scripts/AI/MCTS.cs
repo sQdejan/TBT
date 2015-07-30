@@ -143,14 +143,14 @@ public class MCTS : MonoBehaviour {
 		BestChild(0);
 		AIGameFlow.move = currentNode;
 
-//		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
-//		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
-//		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
-//
-//		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
-//
-//		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
-//		UnityEngine.Debug.Log("Cycles = " + i);
+		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
+		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
+		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
+
+		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
+
+		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
+		UnityEngine.Debug.Log("Cycles = " + i);
 //
 //		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
 

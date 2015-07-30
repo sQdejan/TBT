@@ -79,6 +79,8 @@ public class AIGameFlow : MonoBehaviour {
 						tmpUnit = new AIWarrior();
 					} else if (occupier.GetComponent<Unit>().classType == ClassType.RANGED) {
 						tmpUnit = new AIRanger();
+					} else if (occupier.GetComponent<Unit>().classType == ClassType.RUNNER) {
+						tmpUnit = new AIRunner();
 					}
 
 					if(occupier.tag == "PlayerUnit") {
@@ -135,19 +137,7 @@ public class AIGameFlow : MonoBehaviour {
 		to.moveDirection = from.moveDirection;
 	}
 
-	//Need this when resetting the gamestate before each simulation
-	//same as above except it takes two AIUnits
-	void CopyStats(AIUnit from, AIUnit to) {
-		to.possibleMovesStraight = from.possibleMovesStraight;
-		to.possibleMovesStrafe = from.possibleMovesStrafe;
-		to.attackRange = from.attackRange;
-		to.health = from.health;
-		to.damage = from.damage;
-		to.attackDirection = from.attackDirection;
-		to.moveDirection = from.moveDirection;
-	}
-
-	#endregion
+#endregion
 
 	#region Gameflow related
 

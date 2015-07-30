@@ -50,6 +50,7 @@
      <Compile Include="Assets\Scripts\AI\MCTS.cs" />
      <Compile Include="Assets\Scripts\AI\MCTSNode.cs" />
      <Compile Include="Assets\Scripts\AIUnit\AIRanger.cs" />
+     <Compile Include="Assets\Scripts\AIUnit\AIRunner.cs" />
      <Compile Include="Assets\Scripts\AIUnit\AIUnit.cs" />
      <Compile Include="Assets\Scripts\AIUnit\AIWarrior.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GameFlow.cs" />
