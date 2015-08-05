@@ -163,7 +163,7 @@ public class Warrior : Unit {
 	//------------------------------- For testing ------------------------------
 	public override void AttacksForAutomation (List<MCTSNode> list, GameObject ene) {
 
-		List<MCTSNode> tmpList = new List<MCTSNode>();
+//		List<MCTSNode> tmpList = new List<MCTSNode>();
 
 		Tile enemyUnitTile = ene.GetComponent<Unit>().curTile.GetComponent<Tile>();
 		
@@ -182,18 +182,18 @@ public class Warrior : Unit {
 				int x = tmpWidth + i;
 				if(x >= 0 && x < GridController.Instance.gridWidth) {
 					if(GridController.Instance.tileArray[y,x].available) {
-						tmpList.Add(new MCTSNode(null, Action.ATTACK, y, x, tmpHeight, tmpWidth));
+						list.Add(new MCTSNode(null, Action.ATTACK, y, x, tmpHeight, tmpWidth));
 					}
 				}
 			}
 		}
-
-		if(tmpList.Count > 0) {
-			list.Clear();
-			foreach(MCTSNode node in tmpList) {
-				list.Add(node);
-			}
-		}
+//
+//		if(tmpList.Count > 0) {
+//			list.Clear();
+//			foreach(MCTSNode node in tmpList) {
+//				list.Add(node);
+//			}
+//		}
 	}
 
 	//---------------------------- Testing end ------------------

@@ -70,11 +70,23 @@ public class GridController : MonoBehaviour {
 	}
 
 	//To reset grid when turn is over
-	public void ClearGrid() {
+	public void ResetGrid() {
 		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
 			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
 				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileOriginal;
 				GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = false;
+			}
+		}
+	}
+
+	//Reset everything so a new game can begin
+	public void HardResetGrid() {
+		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+				GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.gridArray[i,j].GetComponent<Tile>().spriteTileOriginal;
+				GridController.Instance.gridArray[i,j].GetComponent<Tile>().available = false;
+				GridController.Instance.gridArray[i,j].GetComponent<Tile>().occupied = false;
+				GridController.Instance.gridArray[i,j].GetComponent<Tile>().occupier = null;
 			}
 		}
 	}

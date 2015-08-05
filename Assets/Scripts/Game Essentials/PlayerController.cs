@@ -33,15 +33,15 @@ public class PlayerController : MonoBehaviour {
 	[HideInInspector]
 	public GameObject currentUnit;
 
-	private CursorState cursorState;
+	CursorState cursorState;
 
-	private LayerMask layerTile;
-	private LayerMask layerEnemy;
+	LayerMask layerTile;
+	LayerMask layerEnemy;
 
-	private GameObject activeTile;
-	private GameObject activeEnemy;
+	GameObject activeTile;
+	GameObject activeEnemy;
 
-	private Vector3 tileSelObjPos;
+	Vector3 tileSelObjPos;
 
 	void Start () {
 		layerTile = 1 << LayerMask.NameToLayer("Tile");
@@ -159,6 +159,7 @@ public class PlayerController : MonoBehaviour {
 		} 
 
 		//Just taking an automatic random move for testing purposes ------------------------------------------ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --------------------------------------
+		//Also used for NEURAL NETWORK decision making
 
 //		List<MCTSNode> poss = new List<MCTSNode>();
 //
@@ -171,7 +172,7 @@ public class PlayerController : MonoBehaviour {
 //			}
 //		}
 //
-//		//possible attacks - if any attacks available I remove the "moves" inside the function and only send back attacks
+//		//possible attacks
 //		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
 //			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
 //				if(GridController.Instance.tileArray[i,j].occupied && GridController.Instance.tileArray[i,j].occupier.tag == "EnemyUnit") { 
@@ -180,17 +181,33 @@ public class PlayerController : MonoBehaviour {
 //			}
 //		}
 //
-//		MCTSNode n = poss[Random.Range(0, poss.Count - 1)]; 
+//		float bestScore = 0;
+//		int bestIndex = 0;
 //
-//		if(n.action == Action.MOVE)
+//		for(int i = 0; i < poss.Count; i++) {
+//
+//			float tmpValue = NNTrainer.Instance.ValueOfState(poss[i]);
+//			if(tmpValue > bestScore) {
+//				bestScore = tmpValue;
+//				bestIndex = i;
+//			}
+//		}
+//
+//		//TODO optimally I need to consider the break evens before the next move
+//
+//		MCTSNode n = poss[bestIndex]; 
+//
+//		if(n.action == Action.MOVE) {
 //			currentUnit.GetComponent<Unit>().Move(GridController.Instance.gridArray[n.gsH,n.gsW]);
-//		else {
+//			GameFlow.Instance.SetPlayerLastMove(Action.MOVE, -1, -1, n.gsH, n.gsW);
+//		} else {
 //			currentUnit.GetComponent<Unit>().Attack(GridController.Instance.gridArray[n.mbagsH,n.mbagsW], GridController.Instance.tileArray[n.gsH, n.gsW].occupier);
+//			GameFlow.Instance.SetPlayerLastMove(Action.ATTACK, n.mbagsH, n.mbagsW, n.gsH, n.gsW);
 //		}
 //
 //		EndTurn();
 
-		//Tiilllll here ------------------------------------------------------------------------
+		//Tiilllll here ------------------------------------------ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --------------------------------------
 	}
 
 	void CursorIcon() {
@@ -221,7 +238,7 @@ public class PlayerController : MonoBehaviour {
 		tileSelectorObject.transform.position = tileSelObjPos;
 		activeTile = null;
 		Unit.attackMoveTile = null;
-		GridController.Instance.ClearGrid();
+		GridController.Instance.ResetGrid();
 		
 		//Just reset sprites
 		if(activeEnemy) {

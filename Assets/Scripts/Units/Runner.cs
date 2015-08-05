@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Runner : Unit {
 
@@ -108,8 +109,34 @@ public class Runner : Unit {
 	}
 
 	//------------------------------- For testing ------------------------------
-	public override void AttacksForAutomation (System.Collections.Generic.List<MCTSNode> list, GameObject ene) {
-		throw new System.NotImplementedException ();
+
+	public override void AttacksForAutomation (List<MCTSNode> list, GameObject ene) {
+
+		int y = 0, x = 0;
+		
+		Tile thisTile = curTile.GetComponent<Tile>();
+		Tile eneTile = ene.GetComponent<Unit>().curTile.GetComponent<Tile>();
+		
+		if(thisTile.HeightIndex < eneTile.HeightIndex)
+			y = 1;
+		else if (thisTile.HeightIndex > eneTile.HeightIndex)
+			y = -1;
+		
+		if(thisTile.WidthIndex < eneTile.WidthIndex)
+			x = 1;
+		else if (thisTile.WidthIndex > eneTile.WidthIndex)
+			x = -1;
+
+		if(y == 0 || x == 0)
+			return;
+
+		GameObject closestTile = ClosestTile(thisTile.HeightIndex, thisTile.WidthIndex, y, x, ene);
+
+		if(closestTile) {
+			list.Add(new MCTSNode(null, Action.ATTACK, closestTile.GetComponent<Tile>().HeightIndex, closestTile.GetComponent<Tile>().WidthIndex, eneTile.HeightIndex, eneTile.WidthIndex));
+		}
+
 	}
+
 	//---------------------------- Testing end ------------------
 }

@@ -6,44 +6,49 @@ public class AIRanger : AIUnit {
 
 	public override void Attack (GameStateUnit moveTo, GameStateUnit attack) {
 
-		if(attack.state == AIGameFlow.GS_EMPTY) {
-			Debug.Log("It's empty and shouldn't be - is the occupier null as well? " + (attack.occupier == null));
-		}
-
-		AIGameFlow.uknow = "I am myself at state " + curgsUnit.state + " with h, w " + curgsUnit.h + ", " + curgsUnit.w + " - the one I attack has the state " + attack.state + " with h, w " + attack.h + ", " + attack.w;
-
 		attack.occupier.TakeDamage(damage);
 	}
 
-	public override System.Collections.Generic.List<MCTSNode> GetPossibleMoves (MCTSNode parent) {
+	public override List<MCTSNode> GetPossibleMoves (MCTSNode parent) {
 		List<MCTSNode> rList = new List<MCTSNode>();
 
 		rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, curgsUnit.h, curgsUnit.w));
 
 		//First I get the possible moves
-		int yM = curgsUnit.h - possibleMovesStraight;
-		
-		while(yM <= curgsUnit.h + possibleMovesStraight) {
-			if(yM >= 0 && yM < MCTS.Instance.gameState.GetLength(0)) {
-				if(MCTS.Instance.gameState[yM,curgsUnit.w].state == AIGameFlow.GS_EMPTY) {
-					rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, yM, curgsUnit.w));
+		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
+			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+					if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+						rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, i, j));
+					}
 				}
 			}
-			
-			yM++;
 		}
-		
-		int xM = curgsUnit.w - possibleMovesStrafe;
-		
-		while(xM <= curgsUnit.w + possibleMovesStraight) {
-			if(xM >= 0 && xM < MCTS.Instance.gameState.GetLength(0)) {
-				if(MCTS.Instance.gameState[curgsUnit.h,xM].state == AIGameFlow.GS_EMPTY) {
-					rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, curgsUnit.h, xM));
-				}
-			}
-			
-			xM++;
-		}
+
+
+//		int yM = curgsUnit.h - possibleMovesStraight;
+//		
+//		while(yM <= curgsUnit.h + possibleMovesStraight) {
+//			if(yM >= 0 && yM < MCTS.Instance.gameState.GetLength(0)) {
+//				if(MCTS.Instance.gameState[yM,curgsUnit.w].state == AIGameFlow.GS_EMPTY) {
+//					rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, yM, curgsUnit.w));
+//				}
+//			}
+//			
+//			yM++;
+//		}
+//		
+//		int xM = curgsUnit.w - possibleMovesStrafe;
+//		
+//		while(xM <= curgsUnit.w + possibleMovesStraight) {
+//			if(xM >= 0 && xM < MCTS.Instance.gameState.GetLength(0)) {
+//				if(MCTS.Instance.gameState[curgsUnit.h,xM].state == AIGameFlow.GS_EMPTY) {
+//					rList.Add(new MCTSNode(parent, Action.MOVE, -1, -1, curgsUnit.h, xM));
+//				}
+//			}
+//			
+//			xM++;
+//		}
 
 		//Then I get the attacks
 
@@ -110,37 +115,51 @@ public class AIRanger : AIUnit {
 		defaultList[index].gsW = curgsUnit.w;
 
 		//First I get the possible moves
-		int yM = curgsUnit.h - possibleMovesStraight;
-		
-		while(yM <= curgsUnit.h + possibleMovesStraight) {
-			if(yM >= 0 && yM < MCTS.Instance.gameState.GetLength(0)) {
-				if(MCTS.Instance.gameState[yM,curgsUnit.w].state == AIGameFlow.GS_EMPTY) {
-					index++;
-					
-					defaultList[index].action = Action.MOVE;
-					defaultList[index].gsH = yM;
-					defaultList[index].gsW = curgsUnit.w;
+		for(int i = 0; i < MCTS.Instance.gameState.GetLength(0); i++) {
+			for(int j = 0; j < MCTS.Instance.gameState.GetLength(1); j++) {
+				if(MCTS.Instance.gameState[i,j].state == AIGameFlow.GS_EMPTY) {
+					if(Mathf.Abs(i - curgsUnit.h) <= possibleMovesStraight && Mathf.Abs(j - curgsUnit.w) <= possibleMovesStrafe) {
+						index++;
+											
+						defaultList[index].action = Action.MOVE;
+						defaultList[index].gsH = i;
+						defaultList[index].gsW = j;
+					}
 				}
 			}
-			
-			yM++;
 		}
-		
-		int xM = curgsUnit.w - possibleMovesStrafe;
-		
-		while(xM <= curgsUnit.w + possibleMovesStraight) {
-			if(xM >= 0 && xM < MCTS.Instance.gameState.GetLength(0)) {
-				if(MCTS.Instance.gameState[curgsUnit.h,xM].state == AIGameFlow.GS_EMPTY) {
-					index++;
-					
-					defaultList[index].action = Action.MOVE;
-					defaultList[index].gsH = curgsUnit.h;
-					defaultList[index].gsW = xM;
-				}
-			}
-			
-			xM++;
-		}
+
+//		int yM = curgsUnit.h - possibleMovesStraight;
+//		
+//		while(yM <= curgsUnit.h + possibleMovesStraight) {
+//			if(yM >= 0 && yM < MCTS.Instance.gameState.GetLength(0)) {
+//				if(MCTS.Instance.gameState[yM,curgsUnit.w].state == AIGameFlow.GS_EMPTY) {
+//					index++;
+//					
+//					defaultList[index].action = Action.MOVE;
+//					defaultList[index].gsH = yM;
+//					defaultList[index].gsW = curgsUnit.w;
+//				}
+//			}
+//			
+//			yM++;
+//		}
+//		
+//		int xM = curgsUnit.w - possibleMovesStrafe;
+//		
+//		while(xM <= curgsUnit.w + possibleMovesStraight) {
+//			if(xM >= 0 && xM < MCTS.Instance.gameState.GetLength(0)) {
+//				if(MCTS.Instance.gameState[curgsUnit.h,xM].state == AIGameFlow.GS_EMPTY) {
+//					index++;
+//					
+//					defaultList[index].action = Action.MOVE;
+//					defaultList[index].gsH = curgsUnit.h;
+//					defaultList[index].gsW = xM;
+//				}
+//			}
+//			
+//			xM++;
+//		}
 		
 		//Then I get the attacks
 		

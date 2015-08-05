@@ -38,6 +38,13 @@ public abstract class Unit : MonoBehaviour {
 	//I need this in order to reset it's stats once a Unit is moving
 	[HideInInspector] public GameObject curTile;
 
+	//For resetting
+	Vector3 oriPosition;
+	int oriHealth;
+	Direction oriAttackDirection;
+	Direction oriMoveDirection;
+	Sprite oriSprite;
+
 	#region Methods to be overridden
 
 	public abstract void ShowPossibleMoves();
@@ -54,6 +61,18 @@ public abstract class Unit : MonoBehaviour {
 	void Start() {
 
 		//Make the start tile occupied
+		FindTile();
+
+		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
+
+		oriPosition = transform.position;
+		oriHealth = health;
+		oriAttackDirection = attackDirection;
+		oriMoveDirection = moveDirection;
+		oriSprite = spriteChild.GetComponent<SpriteRenderer>().sprite;
+	}
+
+	public void FindTile() {
 		LayerMask tileLayer = 1 << LayerMask.NameToLayer("Tile");
 		RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.zero, 0, tileLayer);
 		if(hit.collider != null) {
@@ -63,8 +82,21 @@ public abstract class Unit : MonoBehaviour {
 			curTile.GetComponent<Tile>().occupier = gameObject;
 		}
 
-		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
 		GetComponentInChildren<SpriteRenderer>().sortingOrder = curTile.GetComponent<Tile>().HeightIndex;
+	}
+
+	public void ResetUnit() {
+		gameObject.SetActive(true);
+
+		transform.position = oriPosition;
+		health = oriHealth;
+		attackDirection = oriAttackDirection;
+		moveDirection = oriMoveDirection;
+		spriteChild.GetComponent<SpriteRenderer>().sprite = oriSprite;
+		spriteChild.GetComponent<SpriteRenderer>().color = oriSpriteColor;
+		attackMoveTile = null;
+
+		FindTile();
 	}
 
 	public void Move (GameObject nextTile) {

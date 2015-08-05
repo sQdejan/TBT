@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System;
 using System.Threading;
 
@@ -14,8 +14,10 @@ public class UnitTest : MonoBehaviour {
 
 	void Start() {
 
-		thread = new Thread(ThreadFunction);
-		thread.Start();
+//		thread = new Thread(ThreadFunction);
+//		thread.Start();
+
+
 
 //		Stopwatch sw = new Stopwatch();
 //		sw.Start();

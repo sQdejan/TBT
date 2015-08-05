@@ -8,42 +8,42 @@ public class Ranger : Unit {
 		int curUnitHeightInd = curTile.GetComponent<Tile>().HeightIndex;
 		int curUnitWidthInd = curTile.GetComponent<Tile>().WidthIndex;
 		
-//		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
-//			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
-//				if(!GridController.Instance.tileArray[i,j].occupied || GridController.Instance.tileArray[i,j].occupier.Equals(this.gameObject)) {
-//					if(Mathf.Abs(i - curUnitHeightInd) <= possibleMovesStraight && Mathf.Abs(j - curUnitWidthInd) <= possibleMovesStrafe) {
-//						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
-//						GridController.Instance.tileArray[i,j].available = true;
-//					}
+		for(int i = 0; i < GridController.Instance.gridHeight; i++) {
+			for(int j = 0; j < GridController.Instance.gridWidth; j++) {
+				if(!GridController.Instance.tileArray[i,j].occupied || GridController.Instance.tileArray[i,j].occupier.Equals(this.gameObject)) {
+					if(Mathf.Abs(i - curUnitHeightInd) <= possibleMovesStraight && Mathf.Abs(j - curUnitWidthInd) <= possibleMovesStrafe) {
+						GridController.Instance.gridArray[i,j].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[i,j].spriteTilePossibleMove;
+						GridController.Instance.tileArray[i,j].available = true;
+					}
+				}
+			}
+		}
+
+//		int y = curUnitHeightInd - possibleMovesStraight;
+//
+//		while(y <= curUnitHeightInd + possibleMovesStraight) {
+//			if(y >= 0 && y < GridController.Instance.gridHeight) {
+//				if(!GridController.Instance.tileArray[y,curUnitWidthInd].occupied || GridController.Instance.tileArray[y,curUnitWidthInd].occupier.Equals(this.gameObject)) {
+//					GridController.Instance.gridArray[y,curUnitWidthInd].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[y,curUnitWidthInd].spriteTilePossibleMove;
+//					GridController.Instance.tileArray[y,curUnitWidthInd].available = true;
 //				}
 //			}
+//
+//			y++;
 //		}
-
-		int y = curUnitHeightInd - possibleMovesStraight;
-
-		while(y <= curUnitHeightInd + possibleMovesStraight) {
-			if(y >= 0 && y < GridController.Instance.gridHeight) {
-				if(!GridController.Instance.tileArray[y,curUnitWidthInd].occupied || GridController.Instance.tileArray[y,curUnitWidthInd].occupier.Equals(this.gameObject)) {
-					GridController.Instance.gridArray[y,curUnitWidthInd].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[y,curUnitWidthInd].spriteTilePossibleMove;
-					GridController.Instance.tileArray[y,curUnitWidthInd].available = true;
-				}
-			}
-
-			y++;
-		}
-
-		int x = curUnitWidthInd - possibleMovesStrafe;
-
-		while(x <= curUnitWidthInd + possibleMovesStraight) {
-			if(x >= 0 && x < GridController.Instance.gridWidth) {
-				if(!GridController.Instance.tileArray[curUnitHeightInd,x].occupied) {
-					GridController.Instance.gridArray[curUnitHeightInd,x].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[curUnitHeightInd,x].spriteTilePossibleMove;
-					GridController.Instance.tileArray[curUnitHeightInd,x].available = true;
-				}
-			}
-			
-			x++;
-		}
+//
+//		int x = curUnitWidthInd - possibleMovesStrafe;
+//
+//		while(x <= curUnitWidthInd + possibleMovesStraight) {
+//			if(x >= 0 && x < GridController.Instance.gridWidth) {
+//				if(!GridController.Instance.tileArray[curUnitHeightInd,x].occupied) {
+//					GridController.Instance.gridArray[curUnitHeightInd,x].GetComponent<SpriteRenderer>().sprite = GridController.Instance.tileArray[curUnitHeightInd,x].spriteTilePossibleMove;
+//					GridController.Instance.tileArray[curUnitHeightInd,x].available = true;
+//				}
+//			}
+//			
+//			x++;
+//		}
 	}
 
 	public override void Attack (GameObject moveToObj, GameObject attackObj) {
@@ -119,7 +119,7 @@ public class Ranger : Unit {
 
 	public override void AttacksForAutomation (List<MCTSNode> list, GameObject ene) {
 
-		List<MCTSNode> tmpList = new List<MCTSNode>();
+//		List<MCTSNode> tmpList = new List<MCTSNode>();
 
 		int enemyHeight = ene.GetComponent<Unit>().curTile.GetComponent<Tile>().HeightIndex;
 		int enemyWidth = ene.GetComponent<Unit>().curTile.GetComponent<Tile>().WidthIndex;
@@ -134,14 +134,14 @@ public class Ranger : Unit {
 			if(thisHeight - enemyHeight > 0) {
 				while(--y >= 0 && y < GridController.Instance.gridHeight) {
 					if(GridController.Instance.tileArray[y,thisWidth].occupied && GridController.Instance.tileArray[y,thisWidth].occupier.Equals(ene))
-						tmpList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, y, thisWidth));
+						list.Add(new MCTSNode(null, Action.ATTACK, 1, 1, y, thisWidth));
 					else if (GridController.Instance.tileArray[y, thisWidth].occupied)
 						break;
 				}
 			} else {
 				while(++y >= 0 && y < GridController.Instance.gridHeight) {
 					if(GridController.Instance.tileArray[y,thisWidth].occupied && GridController.Instance.tileArray[y,thisWidth].occupier.Equals(ene))
-						tmpList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, y, thisWidth));
+						list.Add(new MCTSNode(null, Action.ATTACK, 1, 1, y, thisWidth));
 					else if (GridController.Instance.tileArray[y, thisWidth].occupied)
 						break;
 				}
@@ -156,26 +156,26 @@ public class Ranger : Unit {
 			if(thisWidth - enemyWidth > 0) {
 				while(--x >= 0 && x < GridController.Instance.gridWidth) {
 					if(GridController.Instance.tileArray[thisHeight,x].occupied && GridController.Instance.tileArray[thisHeight,x].occupier.Equals(ene))
-						tmpList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, thisHeight, x));
+						list.Add(new MCTSNode(null, Action.ATTACK, 1, 1, thisHeight, x));
 					else if (GridController.Instance.tileArray[thisHeight,x].occupied)
 						break;
 				}
 			} else {
 				while(++x >= 0 && x < GridController.Instance.gridWidth) {
 					if(GridController.Instance.tileArray[thisHeight,x].occupied && GridController.Instance.tileArray[thisHeight,x].occupier.Equals(ene))
-						tmpList.Add(new MCTSNode(null, Action.ATTACK, 1, 1, thisHeight, x));
+						list.Add(new MCTSNode(null, Action.ATTACK, 1, 1, thisHeight, x));
 					else if (GridController.Instance.tileArray[thisHeight,x].occupied)
 						break;
 				}
 			}
 		}
 
-		if(tmpList.Count > 0) {
-			list.Clear();
-			foreach(MCTSNode node in tmpList) {
-				list.Add(node);
-			}
-		}
+//		if(tmpList.Count > 0) {
+//			list.Clear();
+//			foreach(MCTSNode node in tmpList) {
+//				list.Add(node);
+//			}
+//		}
 	}
 
 	//---------------------------- Testing end ------------------

@@ -37,11 +37,12 @@ public class MCTS : MonoBehaviour {
 	List<MCTSNode> defaultList = new List<MCTSNode>(); //Used for optimising default
 
 	//For testing/debugging
-	int highestIndex = 0;
-	long maxIndex = 0;
+	int minDefaultDepth = int.MaxValue;
+	int maxDefaultDepth = int.MinValue;
 	int totalcalls = 0;
 	int maxChildIndex = 0;
-
+	int maxFinalNodes = 0;
+	int tmpFinalNodes = 0;
 	long totalTime = 0;
 	Stopwatch test = new Stopwatch();
 
@@ -58,13 +59,18 @@ public class MCTS : MonoBehaviour {
 		GetMove(worker, e);
 	}
 
+	//Used for resetting the game in GameFlow.cs
+	public void ResetCurrentNode() {
+		currentNode = null;
+	}
+
 	/// <summary>
 	/// I use this function in order to continue on the tree previously expanded
 	/// in order not to lose the information/statistic already discovered
 	/// </summary>
 	bool UpdateRootNode() {
 
-		if(currentNode == null) {
+		if(currentNode == null || currentNode.children == null) {
 			return false;
 		}
 
@@ -78,15 +84,19 @@ public class MCTS : MonoBehaviour {
 			GameFlow.didPlayerHaveATurn = false;
 		}
 
-		UnityEngine.Debug.Log("------");
+//		UnityEngine.Debug.Log("------");
 		bool match = false;
 
 		foreach(MCTSNode n in GameFlow.playerLastMoveList) {
 			match = false;
 
+			//Just check if the node has even been expanded
+			if(currentNode.children == null)
+				return false;
+
 			foreach(MCTSNode node in currentNode.children) {
 				if(node.Equals(n)) {
-					UnityEngine.Debug.Log("MATCH MATCH");
+//					UnityEngine.Debug.Log("MATCH MATCH");
 					currentNode = node;
 					rootNode = currentNode;
 					rootNode.parent = null;
@@ -106,14 +116,15 @@ public class MCTS : MonoBehaviour {
 
 	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
 
-		highestIndex = 0;
-		maxIndex = 0;
 		totalcalls = 0;	
 		maxChildIndex = 0;
 		totalTime = 0;
+		minDefaultDepth = int.MaxValue;
+		maxDefaultDepth = int.MinValue;
+		tmpFinalNodes = 0;
 
 		if (!UpdateRootNode()) {
-			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
+//			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
 			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
 		}
 
@@ -125,7 +136,7 @@ public class MCTS : MonoBehaviour {
 
 			if(worker.CancellationPending) {
 				e.Cancel = true;
-				break;
+				return;
 			}
 //			test.Start();
 			TreePolicy();
@@ -143,14 +154,17 @@ public class MCTS : MonoBehaviour {
 		BestChild(0);
 		AIGameFlow.move = currentNode;
 
-		UnityEngine.Debug.Log("Highest child count is = " + highestIndex);
-		UnityEngine.Debug.Log("Average child count is = " + (maxIndex / totalcalls));
-		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
-
-		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
-
-		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
-		UnityEngine.Debug.Log("Cycles = " + i);
+//		if(tmpFinalNodes > maxFinalNodes) {
+//			maxFinalNodes = tmpFinalNodes;
+//			UnityEngine.Debug.Log("Amount of final nodes = " + maxFinalNodes);
+//		}
+//		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
+//
+//		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
+//
+//		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
+//		UnityEngine.Debug.Log("Min default depth is " + minDefaultDepth);
+//		UnityEngine.Debug.Log("Max default depth is " + maxDefaultDepth);
 //
 //		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
 
@@ -193,8 +207,11 @@ public class MCTS : MonoBehaviour {
 		int bestIndex = 0;
 		float bestScore = 0;
 
-		//I need to consider if it's the AI or the Player's move
-		char curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
+		char curTurn = AIGameFlow.GS_AI;
+
+		//if C == 0 I need to consider if it's the AI or the Player's move
+		if(C != 0)
+			curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
 
 		List<UCTValueHolder> UCTValues = new List<UCTValueHolder>();
 
@@ -219,8 +236,6 @@ public class MCTS : MonoBehaviour {
 				}
 			}
 
-			bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
-
 		} else if (curTurn == AIGameFlow.GS_PLAYER) {
 			bestScore = float.MaxValue;
 			
@@ -243,12 +258,10 @@ public class MCTS : MonoBehaviour {
 						UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
 				}
 			}
-			
-			bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
-
-		} else {
-			UnityEngine.Debug.Log("I should never ever be here!!");
 		}
+
+		WeedOutMoveFromList(ref UCTValues);
+		bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
 
 		currentNode = currentNode.children[bestIndex];
 
@@ -274,6 +287,26 @@ public class MCTS : MonoBehaviour {
 		} else {
 			return false;
 		}
+	}
+
+	/// <summary>
+	/// Used to priotise ATTACK over MOVE if break-even is happening.
+	/// If this is not implemented the game can continue for a long time
+	/// even though the computer has already won because all moves will lead
+	/// to a victory.
+	/// </summary>
+	/// <param name="list">List.</param>
+	void WeedOutMoveFromList(ref List<UCTValueHolder> list) {
+
+		List<UCTValueHolder> tmpList = new List<UCTValueHolder>();
+
+		for(int i = 0; i < list.Count; i++) {
+			if(currentNode.children[list[i].index].action == Action.ATTACK)
+				tmpList.Add(list[i]);
+		}
+
+		if(tmpList.Count > 0)
+			list = tmpList;
 	}
 	
 	/// <summary>
@@ -315,15 +348,12 @@ public class MCTS : MonoBehaviour {
 	/// <returns>The default policy reward.</returns>
 	float DefaultPolicy() {
 		
-		int result = AIGameFlow.Instance.IsGameOver();
+		float result = AIGameFlow.Instance.IsGameOver();
+
+		int depth = 0;
 
 		while(result == -1) {
 			int index = AIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
-
-			if(index > highestIndex)
-				highestIndex = index;
-
-			maxIndex += index;
 
 			MCTSNode action = defaultList[rnd.Next(0, index + 1)];
 
@@ -333,9 +363,19 @@ public class MCTS : MonoBehaviour {
 				AIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
 
+			depth++;
 			totalcalls++;
 			result = AIGameFlow.Instance.StartNextTurn();
 		}
+
+		if(depth < minDefaultDepth)
+			minDefaultDepth = depth;
+
+		if(depth > maxDefaultDepth)
+			maxDefaultDepth = depth;
+
+		if(result == 0 || result == 1)
+			tmpFinalNodes++;
 
 		return result;
 	}
@@ -366,7 +406,7 @@ public class MCTS : MonoBehaviour {
 	}
 }
 
-class UCTValueHolder {
+public class UCTValueHolder {
 	public int index;
 	public float UCTValue;
 

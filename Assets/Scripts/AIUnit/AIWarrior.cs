@@ -8,12 +8,6 @@ public class AIWarrior : AIUnit {
 
 		Move(moveTo);
 
-		if(attack.state == AIGameFlow.GS_EMPTY) {
-			AIGameFlow.PrintGameState(MCTS.Instance.gameState);
-			Debug.Log("It's empty and shouldn't be - is the occupier null as well? " + (attack.occupier == null));
-			Debug.Log("I am myself at state " + curgsUnit.state + " with h, w " + curgsUnit.h + ", " + curgsUnit.w);
-		}
-
 		attack.occupier.TakeDamage(damage);
 	}
 

@@ -35,6 +35,7 @@ public class AIGameFlow : MonoBehaviour {
 
 	public List<AIUnit> turnOrderList;
 	[HideInInspector] public int curTurnOrderIndex;
+	[HideInInspector] public int turnsTaken;
 
 	int height, width;
 
@@ -52,10 +53,10 @@ public class AIGameFlow : MonoBehaviour {
 		if(!finished)
 			return;
 
-		GameFlow.Instance.MoveHasBeenCalculated();
+		GameFlow.Instance.MoveHasBeenCalculated(false);
 	}
 
-	#region Setup related
+#region Setup related
 
 	//Initialise the current game state and prepare for MCTS
 	public void SetupGameState() {
@@ -119,11 +120,9 @@ public class AIGameFlow : MonoBehaviour {
 
 		if(e.Error != null) {
 			Debug.LogError(e.Error.Message + e.Error.StackTrace);
-//			Debug.LogError(e.Error.TargetSite);
 		} else if(e.Cancelled) {
-			Debug.Log("Event is cancelled");
-		} else {
-//			Debug.Log("We succeeded");
+			Debug.Log("Event is cancelled and the game is restarted");
+			GameFlow.restartGame = true;
 		}
 	}
 
@@ -139,13 +138,13 @@ public class AIGameFlow : MonoBehaviour {
 
 #endregion
 
-	#region Gameflow related
+#region Gameflow related
 
-	public int StartNextTurn() {
+	public float StartNextTurn() {
 
-		int isGameOver = IsGameOver();
+		float isGameOver = IsGameOver();
 
-		if(isGameOver == 1 || isGameOver == 0)
+		if(isGameOver >= 0)
 			return isGameOver;
 
 		if(++curTurnOrderIndex >= turnOrderList.Count)
@@ -153,10 +152,10 @@ public class AIGameFlow : MonoBehaviour {
 
 		activeUnit = turnOrderList[curTurnOrderIndex];
 
+		turnsTaken++;
+
 		return isGameOver;
 	}
-
-	public static string uknow = "";
 
 	public void KillUnit(AIUnit unit) {
 
@@ -165,7 +164,6 @@ public class AIGameFlow : MonoBehaviour {
 		if(tmpIndex >= turnOrderList.Count || tmpIndex < 0) {
 			PrintGameState(MCTS.Instance.gameState);
 			Debug.Log("From AIRanger I get this: ");
-			Debug.Log(AIGameFlow.uknow);
 			Debug.Log("I am killed by the unit " + unit.possibleTarget + " and I am " + unit.curgsUnit.state + " with h " + unit.curgsUnit.h + " and w " + unit.curgsUnit.w);
 			Debug.Log("and turnorder count is = " + turnOrderList.Count);
 		}
@@ -179,7 +177,12 @@ public class AIGameFlow : MonoBehaviour {
 		turnOrderList.RemoveAt(tmpIndex);
 	}
 
-	public int IsGameOver() {
+	public float IsGameOver() {
+
+		if(turnsTaken >= GameFlow.MAX_TURNS) {
+			return 0.5f;
+		}
+
 		bool foundPlayer = false;
 		bool foundAI = false;
 
@@ -206,9 +209,9 @@ public class AIGameFlow : MonoBehaviour {
 		return -99;
 	}
 
-	#endregion
+#endregion
 
-	#region Helpers/Misc 
+#region Helpers/Misc 
 
 	//For resetting the MCTS - also resetting the turn order list here
 	public GameStateUnit[,] GetCopyOfGameState() {
@@ -227,6 +230,8 @@ public class AIGameFlow : MonoBehaviour {
 		for(int i = 0; i < turnOrderArray.Length; i++) {
 			turnOrderList.Add(rArray[turnOrderArray[i].h, turnOrderArray[i].w].occupier);
 		}
+
+		turnsTaken = GameFlow.Instance.turnsTaken - 2;
 
 		//Start the process
 		StartNextTurn();
@@ -273,29 +278,10 @@ public class AIGameFlow : MonoBehaviour {
 
 	//If I reset the scene I abort the thread for good measures
 	public void CancelBackgroundWorker() {
-//		MCTSThread.Abort();
 		MCTSBackgroundWorker.CancelAsync();
 	}
 
-//	void OnGUI() {
-//		if(GUI.Button(new Rect(0,0,100,20), "Setup")) {
-////			SetupGameState();t
-//		}
-//
-//		if(GUI.Button(new Rect(100,0,100,20), "Start")) {
-//			MCTSThread.Abort();
-//		}
-//
-//		if(GUI.Button(new Rect(200,0,100,20), "Print gs")) {
-//			PrintGameState(gameState);
-//		}
-//
-//		if(GUI.Button(new Rect(300,0,100,20), "Units")) {
-//			PrintUnits(gameState);
-//		}
-//	}
-
-	#endregion
+#endregion
 }
 
 public class GameStateUnit {

@@ -1,13 +1,17 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AI/MCTS.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Resources/experiment.config.xml">
     <Files>
-      <File FileName="Assets/Scripts/Units/Runner.cs" Line="63" Column="11" />
-      <File FileName="Assets/Scripts/AIUnit/AIRunner.cs" Line="87" Column="105" />
-      <File FileName="Assets/Scripts/AIUnit/AIWarrior.cs" Line="163" Column="3" />
-      <File FileName="Assets/Scripts/AIUnit/AIUnit.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Game Essentials/PlayerController.cs" Line="242" Column="8" />
-      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="146" Column="1" />
+      <File FileName="Assets/Scripts/AI/MCTS.cs" Line="163" Column="17" />
+      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="275" Column="41" />
+      <File FileName="Assets/Scripts/AI/AIGameFlow.cs" Line="184" Column="4" />
+      <File FileName="Assets/Scripts/AI/Neural Network/NNAIGameFlow.cs" Line="225" Column="48" />
+      <File FileName="Assets/Scripts/AI/Neural Network/NNMCTS.cs" Line="163" Column="1" />
+      <File FileName="Assets/Scripts/AI/Neural Network/NNTrainer.cs" Line="150" Column="1" />
+      <File FileName="Assets/UnityNEAT/SharpNEAT/Optimizer.cs" Line="129" Column="35" />
+      <File FileName="Assets/UnityNEAT/SharpNEAT/Genomes/Neat/NeatGenomeXmlIO.cs" Line="167" Column="39" />
+      <File FileName="Assets/UnityNEAT/SharpNEAT/Core/UnityListEvaluator.cs" Line="107" Column="39" />
+      <File FileName="Assets/Resources/experiment.config.xml" Line="10" Column="31" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
