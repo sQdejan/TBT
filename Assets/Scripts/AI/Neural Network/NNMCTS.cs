@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System;
 
+//IMPORTANT Current setup: for normal MCTS
+//Alternative is NNMCTS
+
 public class NNMCTS : MonoBehaviour {
 	
 	#region Singleton
@@ -23,7 +26,7 @@ public class NNMCTS : MonoBehaviour {
 	
 	#endregion
 	
-	const long RUN_TIME = 5000;
+	const long RUN_TIME = 7000;
 	
 	public NNGameStateUnit[,] gameState;
 	
@@ -362,17 +365,17 @@ public class NNMCTS : MonoBehaviour {
 			totalcalls++;
 			result = NNAIGameFlow.Instance.StartNextTurn();
 
-			if(depth > 30) {
-				result = NNTrainer.Instance.ValueOfState();
-
-				//The output from the ValueOfState is between [0,1] where 1 is a state value favouring the AI whereas 0 is favouring the PLAYER
-				if(result > 0.5f)
-					result = 1;
-				else 
-					result = 0;
-
-				break;
-			}
+//			if(depth > 30) {
+//				result = NNTrainer.Instance.ValueOfState();
+//
+//				//The output from the ValueOfState is between [0,1] where 1 is a state value favouring the AI whereas 0 is favouring the PLAYER
+//				if(result > 0.5f)
+//					result = 1;
+//				else 
+//					result = 0;
+//
+//				break;
+//			}
 		}
 		
 		if(depth < minDefaultDepth)

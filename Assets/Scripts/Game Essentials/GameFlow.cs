@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+//IMPORTANT remember that SetAILastMove has to be called in MoveHasBeenCalculated()
+
 public class GameFlow : MonoBehaviour {
 
 	#region Singleton
@@ -27,6 +29,9 @@ public class GameFlow : MonoBehaviour {
 	public GameObject AIUnits;
 	public Text turnDisplayer;
 
+	public GameObject hoverPlayerUnits;
+	public GameObject hoverAIUnits;
+
 	[HideInInspector]
 	public int turnsTaken = 0;
 
@@ -42,8 +47,10 @@ public class GameFlow : MonoBehaviour {
 	public static bool didAIHaveATurn = false;
 	public static List<MCTSNode> AILastMoveList = new List<MCTSNode>();
 
-	private List<GameObject> unitTurnOrderList = new List<GameObject>(); 
-	private int curTurnIndex = -1;
+	List<GameObject> unitTurnOrderList = new List<GameObject>(); 
+	int curTurnIndex = -1;
+
+	List<GameObject> displayTurnOrderList = new List<GameObject>();
 
 	#region properties
 
@@ -67,6 +74,9 @@ public class GameFlow : MonoBehaviour {
 		for(int i = 0; i < playerUnits.transform.childCount; i++) {
 			unitTurnOrderList.Add(AIUnits.transform.GetChild(i).gameObject);
 			unitTurnOrderList.Add(playerUnits.transform.GetChild(i).gameObject);
+
+			displayTurnOrderList.Add(hoverAIUnits.transform.GetChild(i).gameObject);
+			displayTurnOrderList.Add(hoverPlayerUnits.transform.GetChild(i).gameObject);
 		}
 
 		StartCoroutine(DelayStart());
@@ -83,7 +93,8 @@ public class GameFlow : MonoBehaviour {
 
 		if(!IsGameOver()) {
 			playersCurrentTurn = StartNextTurn();
-			UpdateTurnText();
+			UpdateImageTurnDisplay();
+//			UpdateTurnText();
 		} else {
 			playersCurrentTurn = false; //Just to reset shashizzle in playercontroller
 		}
@@ -100,20 +111,20 @@ public class GameFlow : MonoBehaviour {
 		GameObject tmpObject = unitTurnOrderList[curTurnIndex];
 
 		if(tmpObject.tag == "PlayerUnit") {
-//			PlayerController.Instance.currentUnit = tmpObject;
-//			//Show what unit is the current active
-//			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
-//			//Show posssible moves
-//			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
-//			//Used in MCTS
-//			didPlayerHaveATurn = true;
+			PlayerController.Instance.currentUnit = tmpObject;
+			//Show what unit is the current active
+			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
+			//Show posssible moves
+			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+			//Used in MCTS
+			didPlayerHaveATurn = true;
 
 			//Below for NNMCTS
-			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
-			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
-
-			NNAIGameFlow.Instance.SetupGameState();
-			didPlayerHaveATurn = true;
+//			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+//			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+//
+//			NNAIGameFlow.Instance.SetupGameState();
+//			didPlayerHaveATurn = true;
 
 			return true;
 		} else {
@@ -152,6 +163,47 @@ public class GameFlow : MonoBehaviour {
 		turnDisplayer.text = tmpString;
 	}
 
+	void UpdateImageTurnDisplay() {
+
+		int offset = Screen.width / 13;
+		int yOffset = Screen.height / 14;
+		int startpoint = Screen.width / 15;
+
+		for(int i = curTurnIndex; i < displayTurnOrderList.Count; i++) {
+			Vector3 toPos = new Vector3(startpoint, yOffset, 0);
+
+			StartCoroutine(SlideImageTurnDisplay(displayTurnOrderList[i], toPos));
+
+//			displayTurnOrderList[i].GetComponent<RectTransform>().position = new Vector3(startpoint, tmpPos.y, tmpPos.z);
+			startpoint += offset;
+		}
+		
+		if(curTurnIndex > 0) {
+			for(int i = 0; i < curTurnIndex; i++) {
+				Vector3 toPos = new Vector3(startpoint, yOffset, 0);
+				
+				StartCoroutine(SlideImageTurnDisplay(displayTurnOrderList[i], toPos));
+
+//				displayTurnOrderList[i].GetComponent<RectTransform>().position = new Vector3(startpoint, tmpPos.y, tmpPos.z);
+				startpoint += offset;
+			}
+		}
+	}
+
+	IEnumerator SlideImageTurnDisplay(GameObject slideObj, Vector3 toPos) {
+		float travelTime = 1f;
+		float time = 0;
+
+		RectTransform tmpRT = slideObj.GetComponent<RectTransform>();
+
+		while(time < travelTime) {
+			tmpRT.position = Vector3.Lerp(tmpRT.position, toPos, time/travelTime);
+			time += Time.fixedDeltaTime;
+			
+			yield return new WaitForFixedUpdate();
+		}
+	}
+
 	public static int teamWhite = 0;
 	public static int teamRed = 0;
 	public static int draw = 0;
@@ -160,8 +212,8 @@ public class GameFlow : MonoBehaviour {
 
 		if(turnsTaken >= MAX_TURNS) {
 			draw++;
-			gameOutcome = 0.5f;
-//			SoftRestartGame();
+			gameOutcome = 10;
+			SoftRestartGame();
 			return true;
 		}
 
@@ -188,7 +240,7 @@ public class GameFlow : MonoBehaviour {
 			gameOutcome = 20;
 		}
 
-//		SoftRestartGame();
+		SoftRestartGame();
 
 		return true;
 	}
@@ -199,6 +251,10 @@ public class GameFlow : MonoBehaviour {
 			curTurnIndex--;
 
 		unitTurnOrderList.Remove(obj);
+
+		//Turn of the turn displayer shower object
+		displayTurnOrderList[tmpIndex].SetActive(false);
+		displayTurnOrderList.RemoveAt(tmpIndex);
 	}
 
 	public void MoveHasBeenCalculated(bool playerMove) {
@@ -222,7 +278,7 @@ public class GameFlow : MonoBehaviour {
 			AIGameFlow.finished = false;
 			playerLastMoveList.Clear();
 
-			SetAILastMove(AIGameFlow.move.action, AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW, AIGameFlow.move.gsH, AIGameFlow.move.gsW);
+//			SetAILastMove(AIGameFlow.move.action, AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW, AIGameFlow.move.gsH, AIGameFlow.move.gsW);
 		} else {
 			Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
 
@@ -272,7 +328,7 @@ public class GameFlow : MonoBehaviour {
 	//necessary for NEAT.
 	public void SoftRestartGame() {
 
-//		Debug.Log("After game " + ++gamesplayed + " the score is white(5s): " + teamWhite + " - red(5s): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+		Debug.Log("After game " + ++gamesplayed + " the score is white(5s): " + teamWhite + " - red(5s): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
 
 		turnsTaken = 0;
 
@@ -286,6 +342,7 @@ public class GameFlow : MonoBehaviour {
 		AILastMoveList = new List<MCTSNode>();
 		playerLastMoveList = new List<MCTSNode>();
 		unitTurnOrderList = new List<GameObject>(); 
+		displayTurnOrderList = new List<GameObject>();
 		curTurnIndex = -1;
 
 		for(int i = 0; i < playerUnits.transform.childCount; i++) {
@@ -294,6 +351,12 @@ public class GameFlow : MonoBehaviour {
 
 			unitTurnOrderList.Add(AIUnits.transform.GetChild(i).gameObject);
 			unitTurnOrderList.Add(playerUnits.transform.GetChild(i).gameObject);
+
+			hoverPlayerUnits.transform.GetChild(i).gameObject.SetActive(true);
+			hoverAIUnits.transform.GetChild(i).gameObject.SetActive(true);
+
+			displayTurnOrderList.Add(hoverAIUnits.transform.GetChild(i).gameObject);
+			displayTurnOrderList.Add(hoverPlayerUnits.transform.GetChild(i).gameObject);
 		}
 
 		StartCoroutine(DelayStart());

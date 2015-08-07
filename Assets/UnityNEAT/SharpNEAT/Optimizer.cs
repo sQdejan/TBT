@@ -240,8 +240,16 @@ public class Optimizer : MonoBehaviour {
 //        return 0;
     }
 
+	public static int curOrganism = 0;
+	public static int curIteration = 0;
+
     void OnGUI()
     {
+		GUI.Label(new Rect(10,10, 300, 40), Application.persistentDataPath);
+		GUI.Label(new Rect(10, 60, 300, 40), "Generation: " + myGen);
+		GUI.Label(new Rect(10, 110, 300, 40), "Organism: " + curOrganism);
+		GUI.Label(new Rect(10, 160, 300, 40), "Iteration: " + curIteration);
+
 //        if (GUI.Button(new Rect(10, 10, 100, 40), "Start EA"))
 //        {
 //            StartEA();

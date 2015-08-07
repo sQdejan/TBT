@@ -23,7 +23,7 @@ public class MCTS : MonoBehaviour {
 	
 #endregion
 
-	const long RUN_TIME = 5000;
+	const long RUN_TIME = 7000;
 
 	public GameStateUnit[,] gameState;
 
@@ -154,6 +154,8 @@ public class MCTS : MonoBehaviour {
 		BestChild(0);
 		AIGameFlow.move = currentNode;
 
+		UnityEngine.Debug.Log("I found amount of nodes with value 1 " + tmpFinalNodes);
+//
 //		if(tmpFinalNodes > maxFinalNodes) {
 //			maxFinalNodes = tmpFinalNodes;
 //			UnityEngine.Debug.Log("Amount of final nodes = " + maxFinalNodes);
@@ -374,7 +376,7 @@ public class MCTS : MonoBehaviour {
 		if(depth > maxDefaultDepth)
 			maxDefaultDepth = depth;
 
-		if(result == 0 || result == 1)
+		if(result == 1)
 			tmpFinalNodes++;
 
 		return result;

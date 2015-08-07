@@ -40,6 +40,7 @@ public abstract class Unit : MonoBehaviour {
 
 	//For resetting
 	Vector3 oriPosition;
+	Vector3 oriPositionSpriteChild;
 	int oriHealth;
 	Direction oriAttackDirection;
 	Direction oriMoveDirection;
@@ -66,6 +67,7 @@ public abstract class Unit : MonoBehaviour {
 		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
 
 		oriPosition = transform.position;
+		oriPositionSpriteChild = spriteChild.transform.position;
 		oriHealth = health;
 		oriAttackDirection = attackDirection;
 		oriMoveDirection = moveDirection;
@@ -89,6 +91,7 @@ public abstract class Unit : MonoBehaviour {
 		gameObject.SetActive(true);
 
 		transform.position = oriPosition;
+		spriteChild.transform.position = oriPositionSpriteChild;
 		health = oriHealth;
 		attackDirection = oriAttackDirection;
 		moveDirection = oriMoveDirection;

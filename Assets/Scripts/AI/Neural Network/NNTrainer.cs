@@ -131,15 +131,17 @@ public class NNTrainer : UnitController {
 		float AIUnits = 0;
 		float AIHealth = 0;
 
-		for(int i = 0; i < NNMCTS.Instance.gameState.GetLength(0); i++) {
-			for(int j = 0; j < NNMCTS.Instance.gameState.GetLength(1); j++) {
-				if (NNMCTS.Instance.gameState[i,j].state == NNAIGameFlow.GS_PLAYER) {
-					playerUnits += 1;
-					playerHealth += (float)NNMCTS.Instance.gameState[i,j].occupier.health;
-				} else if (NNMCTS.Instance.gameState[i,j].state == NNAIGameFlow.GS_AI) {
-					AIUnits += 1;
-					AIHealth += (float)NNMCTS.Instance.gameState[i,j].occupier.health;
-				} 
+		for(int i = 0; i < GridController.Instance.tileArray.GetLength(0); i++) {
+			for(int j = 0; j < GridController.Instance.tileArray.GetLength(1); j++) {
+				if(GridController.Instance.tileArray[i,j].occupied) {
+					if(GridController.Instance.tileArray[i,j].occupier.tag == "PlayerUnit") {
+						playerUnits += 1;
+						playerHealth += (float)GridController.Instance.tileArray[i,j].occupier.GetComponent<Unit>().health;
+					} else {
+						AIUnits += 1;
+						AIHealth += (float)GridController.Instance.tileArray[i,j].occupier.GetComponent<Unit>().health;
+					}
+				}
 			}
 		}
 

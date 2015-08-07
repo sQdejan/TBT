@@ -16,7 +16,7 @@ namespace SharpNEAT.Core
         readonly IGenomeDecoder<TGenome, TPhenome> _genomeDecoder;
         readonly IPhenomeEvaluator<TPhenome> _phenomeEvaluator;
 
-		const int TRIALS = 2;
+		const int TRIALS = 3;
 
         #region Constructor
 
@@ -51,18 +51,24 @@ namespace SharpNEAT.Core
 
         private IEnumerator evaluateList(IList<TGenome> genomeList)
         {
+			Optimizer.curOrganism = 0;
+			Optimizer.curIteration = 0;
+
 			Dictionary<TGenome, TPhenome> dict = new Dictionary<TGenome, TPhenome>();
 			Dictionary<TGenome, FitnessInfo[]> fitnessDict = new Dictionary<TGenome, FitnessInfo[]>();
 
-			Debug.Log("cur generation: " + curgen++);
-
 			for(int i = 0; i < TRIALS; i++) {
 
+				Optimizer.curIteration = i + 1;
 				_phenomeEvaluator.Reset();
 				dict = new Dictionary<TGenome, TPhenome>();
 
+				int tmpOrganism = 0;
+
 	            foreach (TGenome genome in genomeList)
 	            {
+					Optimizer.curOrganism = ++tmpOrganism;
+
 	                TPhenome phenome = _genomeDecoder.Decode(genome);
 	                if (null == phenome)
 	                {   // Non-viable genome.
