@@ -47,6 +47,8 @@ public class Ranger : Unit {
 	}
 
 	public override void Attack (GameObject moveToObj, GameObject attackObj) {
+		GameObject obj = Instantiate(attackEffect, transform.position + Vector3.up, Quaternion.identity) as GameObject;
+		obj.GetComponent<RangedAttackEffect>().StartProcess(attackObj.transform.position);
 		attackObj.GetComponent<Unit>().TakeDamage(damage);
 	}
 

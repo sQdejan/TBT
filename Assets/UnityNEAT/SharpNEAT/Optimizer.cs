@@ -224,7 +224,7 @@ public class Optimizer : MonoBehaviour {
 		float fitness = NNTrainer.Instance.GetFitness();
 
 		if(!GameFlow.playersCurrentTurn && !GameFlow.Instance.IsGameOver())
-			AIGameFlow.Instance.CancelBackgroundWorker();
+			EnhAIGameFlow.Instance.CancelBackgroundWorker();
 		else if (GameFlow.playersCurrentTurn && !GameFlow.Instance.IsGameOver())
 			NNAIGameFlow.Instance.CancelBackgroundWorker();
 		else 

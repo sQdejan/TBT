@@ -17,6 +17,9 @@ public abstract class Unit : MonoBehaviour {
 	public int health;
 	public int damage;
 
+	public GameObject attackEffect;
+	public GameObject deathEffect;
+
 	public Vector3 spritePosUp;
 	public Vector3 spritePosDown;
 
@@ -163,6 +166,7 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	protected void Death () {
+		Instantiate(deathEffect, transform.position + Vector3.up * 0.3f, Quaternion.identity);
 		GameFlow.Instance.KillUnit(gameObject);
 		curTile.GetComponent<Tile>().occupied = false;
 		gameObject.SetActive(false);
