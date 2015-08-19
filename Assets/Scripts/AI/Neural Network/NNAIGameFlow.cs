@@ -171,7 +171,7 @@ public class NNAIGameFlow : MonoBehaviour {
 	public float IsGameOver() {
 
 		if(turnsTaken >= GameFlow.MAX_TURNS) {
-			return 0.5f;
+			return 0.7f;
 		}
 
 		bool foundPlayer = false;

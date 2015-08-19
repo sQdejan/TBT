@@ -64,56 +64,6 @@ public class MCTS : MonoBehaviour {
 		currentNode = null;
 	}
 
-	/// <summary>
-	/// I use this function in order to continue on the tree previously expanded
-	/// in order not to lose the information/statistic already discovered
-	/// </summary>
-	bool UpdateRootNode() {
-
-		if(currentNode == null || currentNode.children == null) {
-			return false;
-		}
-
-		//If the player did not have the turn we can just continue from
-		//the current node
-		if(!GameFlow.didPlayerHaveATurn) {
-			rootNode = currentNode;
-			rootNode.parent = null;
-			return true;
-		} else {
-			GameFlow.didPlayerHaveATurn = false;
-		}
-
-//		UnityEngine.Debug.Log("------");
-		bool match = false;
-
-		foreach(MCTSNode n in GameFlow.playerLastMoveList) {
-			match = false;
-
-			//Just check if the node has even been expanded
-			if(currentNode.children == null)
-				return false;
-
-			foreach(MCTSNode node in currentNode.children) {
-				if(node.Equals(n)) {
-//					UnityEngine.Debug.Log("MATCH MATCH");
-					currentNode = node;
-					rootNode = currentNode;
-					rootNode.parent = null;
-					match = true;
-				}
-			}
-
-			if(!match)
-				break;
-		}
-
-		if(match)
-			return true;
-		else 
-			return false;
-	}
-
 	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
 
 		totalcalls = 0;	
@@ -154,7 +104,7 @@ public class MCTS : MonoBehaviour {
 		BestChild(0);
 		AIGameFlow.move = currentNode;
 
-		UnityEngine.Debug.Log("I found amount of nodes with value 1 " + tmpFinalNodes);
+//		UnityEngine.Debug.Log("I found amount of nodes with value 1 " + tmpFinalNodes);
 //
 //		if(tmpFinalNodes > maxFinalNodes) {
 //			maxFinalNodes = tmpFinalNodes;
@@ -171,6 +121,56 @@ public class MCTS : MonoBehaviour {
 //		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
 
 		AIGameFlow.finished = true;
+	}
+
+	/// <summary>
+	/// I use this function in order to continue on the tree previously expanded
+	/// in order not to lose the information/statistic already discovered
+	/// </summary>
+	bool UpdateRootNode() {
+		
+		if(currentNode == null || currentNode.children == null) {
+			return false;
+		}
+		
+		//If the player did not have the turn we can just continue from
+		//the current node
+		if(!GameFlow.didPlayerHaveATurn) {
+			rootNode = currentNode;
+			rootNode.parent = null;
+			return true;
+		} else {
+			GameFlow.didPlayerHaveATurn = false;
+		}
+		
+		//		UnityEngine.Debug.Log("------");
+		bool match = false;
+		
+		foreach(MCTSNode n in GameFlow.playerLastMoveList) {
+			match = false;
+			
+			//Just check if the node has even been expanded
+			if(currentNode.children == null)
+				return false;
+			
+			foreach(MCTSNode node in currentNode.children) {
+				if(node.Equals(n)) {
+					//					UnityEngine.Debug.Log("MATCH MATCH");
+					currentNode = node;
+					rootNode = currentNode;
+					rootNode.parent = null;
+					match = true;
+				}
+			}
+			
+			if(!match)
+				break;
+		}
+		
+		if(match)
+			return true;
+		else 
+			return false;
 	}
 
 	/// <summary>
@@ -255,14 +255,14 @@ public class MCTS : MonoBehaviour {
 			//Find those that are equal in order to take a random decision
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				if(i != UCTValues[0].index) {
-					float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
+					float tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
 					if(tmpUCTValue == UCTValues[0].UCTValue)
 						UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
 				}
 			}
 		}
 
-		WeedOutMoveFromList(ref UCTValues);
+//		WeedOutMoveFromList(ref UCTValues);
 		bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
 
 		currentNode = currentNode.children[bestIndex];

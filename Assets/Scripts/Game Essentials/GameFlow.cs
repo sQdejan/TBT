@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 //IMPORTANT remember that SetAILastMove has to be called in MoveHasBeenCalculated()
+//IMPORTANT	right now it's using EnhMCTS, remember StartNextTurn() and MoveHasBeenCalculated() in order to change
 
 public class GameFlow : MonoBehaviour {
 
@@ -31,6 +32,7 @@ public class GameFlow : MonoBehaviour {
 
 	public GameObject hoverPlayerUnits;
 	public GameObject hoverAIUnits;
+	public Vector3 hoverActiveScale;
 
 	[HideInInspector]
 	public int turnsTaken = 0;
@@ -51,6 +53,9 @@ public class GameFlow : MonoBehaviour {
 	int curTurnIndex = -1;
 
 	List<GameObject> displayTurnOrderList = new List<GameObject>();
+
+	RectTransform rtActive;
+	Vector3 rtOriScale;
 
 	#region properties
 
@@ -78,6 +83,8 @@ public class GameFlow : MonoBehaviour {
 			displayTurnOrderList.Add(hoverAIUnits.transform.GetChild(i).gameObject);
 			displayTurnOrderList.Add(hoverPlayerUnits.transform.GetChild(i).gameObject);
 		}
+
+		rtOriScale = displayTurnOrderList[0].GetComponent<RectTransform>().localScale;
 
 		StartCoroutine(DelayStart());
 	}
@@ -134,7 +141,8 @@ public class GameFlow : MonoBehaviour {
 			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 
-			AIGameFlow.Instance.SetupGameState();
+//			AIGameFlow.Instance.SetupGameState();
+			EnhAIGameFlow.Instance.SetupGameState();
 			didAIHaveATurn = true;
 
 			return false;
@@ -165,26 +173,44 @@ public class GameFlow : MonoBehaviour {
 
 	void UpdateImageTurnDisplay() {
 
-		int offset = Screen.width / 13;
+		if(rtActive) {
+			rtActive.localScale = rtOriScale;
+			rtActive = null;
+		}
+
+
+		bool firstTime = true;
+
+		int offset = Screen.width / 14;
 		int yOffset = Screen.height / 14;
 		int startpoint = Screen.width / 15;
 
 		for(int i = curTurnIndex; i < displayTurnOrderList.Count; i++) {
 			Vector3 toPos = new Vector3(startpoint, yOffset, 0);
-
 			StartCoroutine(SlideImageTurnDisplay(displayTurnOrderList[i], toPos));
 
-//			displayTurnOrderList[i].GetComponent<RectTransform>().position = new Vector3(startpoint, tmpPos.y, tmpPos.z);
+			//Just add a little extra for the first one after the active unit
+			if(firstTime) {
+				rtActive = displayTurnOrderList[i].GetComponent<RectTransform>();
+				rtActive.localScale = hoverActiveScale;
+//				startpoint += offset;
+				firstTime = false;
+			}
 			startpoint += offset;
 		}
 		
 		if(curTurnIndex > 0) {
 			for(int i = 0; i < curTurnIndex; i++) {
 				Vector3 toPos = new Vector3(startpoint, yOffset, 0);
-				
 				StartCoroutine(SlideImageTurnDisplay(displayTurnOrderList[i], toPos));
 
-//				displayTurnOrderList[i].GetComponent<RectTransform>().position = new Vector3(startpoint, tmpPos.y, tmpPos.z);
+				//Just add a little extra for the first one after the active unit
+				if(firstTime) {
+					rtActive = displayTurnOrderList[i].GetComponent<RectTransform>();
+					rtActive.localScale = hoverActiveScale;
+//					startpoint += offset;
+					firstTime = false;
+				}
 				startpoint += offset;
 			}
 		}
@@ -213,7 +239,7 @@ public class GameFlow : MonoBehaviour {
 		if(turnsTaken >= MAX_TURNS) {
 			draw++;
 			gameOutcome = 10;
-			SoftRestartGame();
+//			StartCoroutine(DelayedRestart());
 			return true;
 		}
 
@@ -240,9 +266,14 @@ public class GameFlow : MonoBehaviour {
 			gameOutcome = 20;
 		}
 
-		SoftRestartGame();
+//		StartCoroutine(DelayedRestart());
 
 		return true;
+	}
+
+	IEnumerator DelayedRestart() {
+		yield return new WaitForSeconds(1.1f);
+		SoftRestartGame();
 	}
 
 	public void KillUnit(GameObject obj) {
@@ -258,27 +289,23 @@ public class GameFlow : MonoBehaviour {
 	}
 
 	public void MoveHasBeenCalculated(bool playerMove) {
-
-//		Debug.Log("Applying move");
-
 		if(!playerMove) {
 			Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
-
-			if(AIGameFlow.move.action == Action.MOVE) {
-	//			Debug.Log("I move");
-				curUnit.Move(GridController.Instance.gridArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW]);
-			} else if (AIGameFlow.move.action == Action.ATTACK) {
-	//			Debug.Log("I attack");
-				curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
+			
+			if(EnhAIGameFlow.move.action == Action.MOVE) {
+				curUnit.Move(GridController.Instance.gridArray[EnhAIGameFlow.move.gsH, EnhAIGameFlow.move.gsW]);
+			} else if (EnhAIGameFlow.move.action == Action.ATTACK) {
+				curUnit.Attack(GridController.Instance.gridArray[EnhAIGameFlow.move.mbagsH, EnhAIGameFlow.move.mbagsW], GridController.Instance.tileArray[EnhAIGameFlow.move.gsH, EnhAIGameFlow.move.gsW].occupier);
 			}
-
+			
 			unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
 			GridController.Instance.ResetGrid();
-
-			AIGameFlow.finished = false;
+			
+			EnhAIGameFlow.finished = false;
 			playerLastMoveList.Clear();
 
-//			SetAILastMove(AIGameFlow.move.action, AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW, AIGameFlow.move.gsH, AIGameFlow.move.gsW);
+			SetAILastMove(EnhAIGameFlow.move.action, EnhAIGameFlow.move.mbagsH, EnhAIGameFlow.move.mbagsW, EnhAIGameFlow.move.gsH, EnhAIGameFlow.move.gsW);
+
 		} else {
 			Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
 
@@ -298,6 +325,41 @@ public class GameFlow : MonoBehaviour {
 
 			SetPlayerLastMove(NNAIGameFlow.move.action, NNAIGameFlow.move.mbagsH, NNAIGameFlow.move.mbagsW, NNAIGameFlow.move.gsH, NNAIGameFlow.move.gsW);
 		}
+//		if(!playerMove) {
+//			Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
+//
+//			if(AIGameFlow.move.action == Action.MOVE) {
+//				curUnit.Move(GridController.Instance.gridArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW]);
+//			} else if (AIGameFlow.move.action == Action.ATTACK) {
+//				curUnit.Attack(GridController.Instance.gridArray[AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW], GridController.Instance.tileArray[AIGameFlow.move.gsH, AIGameFlow.move.gsW].occupier);
+//			}
+//
+//			unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
+//			GridController.Instance.ResetGrid();
+//
+//			AIGameFlow.finished = false;
+//			playerLastMoveList.Clear();
+//
+////			SetAILastMove(AIGameFlow.move.action, AIGameFlow.move.mbagsH, AIGameFlow.move.mbagsW, AIGameFlow.move.gsH, AIGameFlow.move.gsW);
+//		} else {
+//			Unit curUnit = unitTurnOrderList[curTurnIndex].GetComponent<Unit>();
+//
+//			if(NNAIGameFlow.move.action == Action.MOVE) {
+//				//			Debug.Log("I move");
+//				curUnit.Move(GridController.Instance.gridArray[NNAIGameFlow.move.gsH, NNAIGameFlow.move.gsW]);
+//			} else if (NNAIGameFlow.move.action == Action.ATTACK) {
+//				//			Debug.Log("I attack");
+//				curUnit.Attack(GridController.Instance.gridArray[NNAIGameFlow.move.mbagsH, NNAIGameFlow.move.mbagsW], GridController.Instance.tileArray[NNAIGameFlow.move.gsH, NNAIGameFlow.move.gsW].occupier);
+//			}
+//			
+//			unitTurnOrderList[curTurnIndex].GetComponentInChildren<SpriteRenderer>().color = unitTurnOrderList[curTurnIndex].GetComponentInChildren<Unit>().oriSpriteColor;
+//			GridController.Instance.ResetGrid();
+//			
+//			NNAIGameFlow.finished = false;
+//			AILastMoveList.Clear();
+//
+//			SetPlayerLastMove(NNAIGameFlow.move.action, NNAIGameFlow.move.mbagsH, NNAIGameFlow.move.mbagsW, NNAIGameFlow.move.gsH, NNAIGameFlow.move.gsW);
+//		}
 
 		EndTurn();
 	}
@@ -319,7 +381,7 @@ public class GameFlow : MonoBehaviour {
 
 	void Update() {
 		if(restartGame) {
-			SoftRestartGame();
+			StartCoroutine(DelayedRestart());
 			restartGame = false;
 		}
 	}
@@ -328,13 +390,14 @@ public class GameFlow : MonoBehaviour {
 	//necessary for NEAT.
 	public void SoftRestartGame() {
 
-		Debug.Log("After game " + ++gamesplayed + " the score is white(5s): " + teamWhite + " - red(5s): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+		Debug.Log("After game " + ++gamesplayed + " the score is white(enh, 7000): " + teamWhite + " - red(enh++, 7000): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
 
 		turnsTaken = 0;
 
 		GridController.Instance.HardResetGrid();
 		MCTS.Instance.ResetCurrentNode();
 		NNMCTS.Instance.ResetCurrentNode();
+		EnhMCTS.Instance.ResetCurrentNode();
 
 		playersCurrentTurn = false;
 		didPlayerHaveATurn = false;

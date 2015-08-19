@@ -105,8 +105,8 @@ public class AIGameFlow : MonoBehaviour {
 		MCTSBackgroundWorker = new BackgroundWorker();
 
 		MCTSBackgroundWorker.WorkerSupportsCancellation = true;
-
 		MCTSBackgroundWorker.DoWork += new DoWorkEventHandler(MCTS.Instance.StartProcess);
+
 		MCTSBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(MCTSBackgroundWorker_RunWorkerCompleted);
 		MCTSBackgroundWorker.RunWorkerAsync();
 

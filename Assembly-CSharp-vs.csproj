@@ -47,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AI\AIGameFlow.cs" />
+     <Compile Include="Assets\Scripts\AI\EnhMCTS\EnhAIGameFlow.cs" />
+     <Compile Include="Assets\Scripts\AI\EnhMCTS\EnhMCTS.cs" />
      <Compile Include="Assets\Scripts\AI\MCTS.cs" />
      <Compile Include="Assets\Scripts\AI\MCTSNode.cs" />
      <Compile Include="Assets\Scripts\AI\Neural Network\NNAIGameFlow.cs" />
@@ -56,14 +58,19 @@
      <Compile Include="Assets\Scripts\AIUnit\AIRunner.cs" />
      <Compile Include="Assets\Scripts\AIUnit\AIUnit.cs" />
      <Compile Include="Assets\Scripts\AIUnit\AIWarrior.cs" />
+     <Compile Include="Assets\Scripts\AIUnit\EnhAIUnit\EnhAIRanger.cs" />
+     <Compile Include="Assets\Scripts\AIUnit\EnhAIUnit\EnhAIUnit.cs" />
+     <Compile Include="Assets\Scripts\AIUnit\EnhAIUnit\EnhAIWarrior.cs" />
      <Compile Include="Assets\Scripts\AIUnit\NNAIUnit\NNAIRanger.cs" />
      <Compile Include="Assets\Scripts\AIUnit\NNAIUnit\NNAIUnit.cs" />
      <Compile Include="Assets\Scripts\AIUnit\NNAIUnit\NNAIWarrior.cs" />
+     <Compile Include="Assets\Scripts\Effects\AnimatedTiles.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GameFlow.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\GridController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Game Essentials\Tile.cs" />
      <Compile Include="Assets\Scripts\Testing\AnimationTest.cs" />
+     <Compile Include="Assets\Scripts\Testing\Test.cs" />
      <Compile Include="Assets\Scripts\Testing\UnitTest.cs" />
      <Compile Include="Assets\Scripts\UI\ActiveFrame.cs" />
      <Compile Include="Assets\Scripts\UI\ImageHover.cs" />

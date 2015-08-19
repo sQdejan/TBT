@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System;
 
-//IMPORTANT Current setup: for normal MCTS
+//IMPORTANT Current setup: for Enhanced MCTS
 //Alternative is NNMCTS
+//Alternative is normal, remember to adjust NNAIGameFlow draw value to normal and remove filter in DefaultPolicy
+//Alternative is EnhMCTS, do opposite of above
 
 public class NNMCTS : MonoBehaviour {
 	
@@ -34,6 +36,7 @@ public class NNMCTS : MonoBehaviour {
 	MCTSNode currentNode;
 	
 	float EC = (float)(1f/Math.Sqrt(2)); //Exploration constant
+	float ECAtt = (float)(1.15f/Math.Sqrt(2));
 	
 	System.Random rnd = new System.Random();
 	
@@ -65,6 +68,63 @@ public class NNMCTS : MonoBehaviour {
 		currentNode = null;
 	}
 	
+	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
+		
+		totalcalls = 0;	
+		maxChildIndex = 0;
+		totalTime = 0;
+		minDefaultDepth = int.MaxValue;
+		maxDefaultDepth = int.MinValue;
+		
+		if (!UpdateRootNode()) {
+			//			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
+			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
+		}
+		
+		Stopwatch sw = new Stopwatch();
+		sw.Start();
+		int i = 0;
+
+//		sw.ElapsedMilliseconds < RUN_TIME
+
+		while(i < 7000) {
+			
+			if(worker.CancellationPending) {
+				e.Cancel = true;
+				return;
+			}
+			//			test.Start();
+			TreePolicy();
+			float reward = DefaultPolicy();
+			BackPropagate(reward);
+			i++;
+			//			test.Stop();
+			//			totalTime += test.ElapsedMilliseconds;
+			//			test.Reset();
+		}
+		sw.Stop();
+		
+		//Find the best move
+		currentNode = rootNode;
+		BestMove();
+		NNAIGameFlow.move = currentNode;
+
+//		UnityEngine.Debug.Log("Total calls " + i + " elapsed time " + (sw.ElapsedMilliseconds / 100));
+//		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
+//
+//		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
+//
+//		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
+//		UnityEngine.Debug.Log("Cycles = " + i);
+//		UnityEngine.Debug.Log("Min default depth is " + minDefaultDepth);
+//		UnityEngine.Debug.Log("Max default depth is " + maxDefaultDepth);
+//
+//		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
+		
+		NNAIGameFlow.finished = true;
+	}
+
+	
 	/// <summary>
 	/// I use this function in order to continue on the tree previously expanded
 	/// in order not to lose the information/statistic already discovered
@@ -84,20 +144,20 @@ public class NNMCTS : MonoBehaviour {
 		} else {
 			GameFlow.didAIHaveATurn = false;
 		}
-
-//		UnityEngine.Debug.Log("------");
+		
+		//		UnityEngine.Debug.Log("------");
 		bool match = false;
 		
 		foreach(MCTSNode n in GameFlow.AILastMoveList) {
 			match = false;
-
+			
 			//Just check if the node has even been expanded
 			if(currentNode.children == null)
 				return false;
-
+			
 			foreach(MCTSNode node in currentNode.children) {
 				if(node.Equals(n)) {
-//					UnityEngine.Debug.Log("MATCH MATCH");
+					//					UnityEngine.Debug.Log("MATCH MATCH");
 					currentNode = node;
 					rootNode = currentNode;
 					rootNode.parent = null;
@@ -114,60 +174,54 @@ public class NNMCTS : MonoBehaviour {
 		else 
 			return false;
 	}
-	
-	void GetMove(BackgroundWorker worker, DoWorkEventArgs e) {
+
+	/// <summary>
+	/// Return best robust child
+	/// </summary>
+	void BestMove() {
 		
-		totalcalls = 0;	
-		maxChildIndex = 0;
-		totalTime = 0;
-		minDefaultDepth = int.MaxValue;
-		maxDefaultDepth = int.MinValue;
+		int bestIndex = 0;
+		float bestScore = float.MaxValue;
+		List<UCTValueHolder> UCTValues = new List<UCTValueHolder>();
 		
-		if (!UpdateRootNode()) {
-			//			UnityEngine.Debug.Log("FALSE - I RESET ROOTNODE");
-			rootNode = new MCTSNode(null, Action.ATTACK, 0, 0, 0, 0);
-		}
-		
-		Stopwatch sw = new Stopwatch();
-		sw.Start();
-		int i = 0;
-		
-		while(sw.ElapsedMilliseconds < RUN_TIME) {
+		for(int i = 0; i < currentNode.children.Count; i++) {
+			float tmpUCTValue = 0;
+			//Bias towards attack
+			if(currentNode.children[i].action == Action.ATTACK)
+				tmpUCTValue = UCTValuePlayerRobustChild(currentNode.children[i], ECAtt);
+			else
+				tmpUCTValue = UCTValuePlayerRobustChild(currentNode.children[i], 0);
 			
-			if(worker.CancellationPending) {
-				e.Cancel = true;
-				return;
+			if(tmpUCTValue < bestScore) {
+				bestScore = tmpUCTValue;
+				bestIndex = i;
 			}
-			//			test.Start();
-			TreePolicy();
-			float reward = DefaultPolicy();
-			BackPropagate(reward);
-			i++;
-			//			test.Stop();
-			//			totalTime += test.ElapsedMilliseconds;
-			//			test.Reset();
 		}
-		sw.Stop();
 		
-		//Find the best move
-		currentNode = rootNode;
-		BestChild(0);
-		NNAIGameFlow.move = currentNode;
+		UCTValues.Add(new UCTValueHolder(bestIndex, bestScore));
 		
-//		UnityEngine.Debug.Log("Average default depth = " + (totalcalls / i));
-//
-//		UnityEngine.Debug.Log("Deepest node = " + maxChildIndex);
-//
-//		UnityEngine.Debug.Log("Total calls for default " + totalcalls);
-//		UnityEngine.Debug.Log("Cycles = " + i);
-//		UnityEngine.Debug.Log("Min default depth is " + minDefaultDepth);
-//		UnityEngine.Debug.Log("Max default depth is " + maxDefaultDepth);
-//
-//		UnityEngine.Debug.Log("Total time for what you are testing " + (totalTime));
+		//Find those that are equal in order to take a random decision
+		for(int i = 0; i < currentNode.children.Count; i++) {
+			if(i != UCTValues[0].index) {
+				float tmpUCTValue = 0;
+				
+				//Bias towards attack
+				if(currentNode.children[i].action == Action.ATTACK)
+					tmpUCTValue = UCTValuePlayerRobustChild(currentNode.children[i], ECAtt);
+				else
+					tmpUCTValue = UCTValuePlayerRobustChild(currentNode.children[i], 0);
+				
+				if(tmpUCTValue == UCTValues[0].UCTValue)
+					UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
+			}
+		}
 		
-		NNAIGameFlow.finished = true;
+		WeedOutMoveFromList(ref UCTValues);
+		bestIndex = UCTValues[rnd.Next(0, UCTValues.Count)].index;
+		
+		currentNode = currentNode.children[bestIndex];
 	}
-	
+
 	/// <summary>
 	/// The tree policy is how I traverse the tree and also makes sure to expand nodes
 	/// if needed.
@@ -203,13 +257,7 @@ public class NNMCTS : MonoBehaviour {
 		
 		int bestIndex = 0;
 		float bestScore = 0;
-		
-		char curTurn = AIGameFlow.GS_PLAYER;
-		
-		//if C == 0 I need to consider if it's the AI or the Player's move
-		if(C != 0)
-			curTurn = AIGameFlow.Instance.turnOrderList[AIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
-
+		char curTurn = NNAIGameFlow.Instance.turnOrderList[NNAIGameFlow.Instance.curTurnOrderIndex].curgsUnit.state;
 		List<UCTValueHolder> UCTValues = new List<UCTValueHolder>();
 		
 		if(curTurn == NNAIGameFlow.GS_AI) {
@@ -238,7 +286,13 @@ public class NNMCTS : MonoBehaviour {
 			bestScore = float.MaxValue;
 			
 			for(int i = 0; i < currentNode.children.Count; i++) {
-				float tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
+				float tmpUCTValue = 0;
+
+				//Bias towards attack
+				if(currentNode.children[i].action == Action.ATTACK)
+					tmpUCTValue = UCTValuePlayer(currentNode.children[i], ECAtt);
+				else
+					tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
 				
 				if(tmpUCTValue < bestScore) {
 					bestScore = tmpUCTValue;
@@ -251,7 +305,14 @@ public class NNMCTS : MonoBehaviour {
 			//Find those that are equal in order to take a random decision
 			for(int i = 0; i < currentNode.children.Count; i++) {
 				if(i != UCTValues[0].index) {
-					float tmpUCTValue = UCTValueAI(currentNode.children[i], C);
+					float tmpUCTValue = 0;
+
+					//Bias towards attack
+					if(currentNode.children[i].action == Action.ATTACK && C != 0)
+						tmpUCTValue = UCTValuePlayer(currentNode.children[i], ECAtt);
+					else
+						tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);
+
 					if(tmpUCTValue == UCTValues[0].UCTValue)
 						UCTValues.Add(new UCTValueHolder(i, tmpUCTValue));
 				}
@@ -266,17 +327,14 @@ public class NNMCTS : MonoBehaviour {
 		//I need to make the move as I do NOT store gamestate on each node.
 		//If C == 0 I am done with the process and no move is required
 		//as it will give an error!!
-		if(C != 0) {
-			if(currentNode.action == Action.MOVE) {
-				NNAIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
-			} else if(currentNode.action == Action.ATTACK) {
-				NNAIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
-			}
-			
-			NNAIGameFlow.Instance.StartNextTurn();
-		} else {
-			return true;
+		if(currentNode.action == Action.MOVE) {
+			NNAIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
+		} else if(currentNode.action == Action.ATTACK) {
+			NNAIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
 		}
+		
+		NNAIGameFlow.Instance.StartNextTurn();
+
 		
 		//If I have reached a final state return false. 
 		//This is to make sure I don't expand further.
@@ -319,9 +377,6 @@ public class NNMCTS : MonoBehaviour {
 		if(currentNode.action == Action.MOVE) {
 			NNAIGameFlow.activeUnit.Move(gameState[currentNode.gsH, currentNode.gsW]);
 		} else if(currentNode.action == Action.ATTACK) {
-			//			if(currentNode.mbagsH == -1)
-			//				AIGameFlow.activeUnit.Attack(null, gameState[currentNode.gsH, currentNode.gsW]);
-			//			else
 			NNAIGameFlow.activeUnit.Attack(gameState[currentNode.mbagsH, currentNode.mbagsW], gameState[currentNode.gsH, currentNode.gsW]);
 		}
 		
@@ -352,7 +407,12 @@ public class NNMCTS : MonoBehaviour {
 
 		while(result == -1) {
 			int index = NNAIGameFlow.activeUnit.GetPossibleMovesDefaultPolicy(defaultList);
+
+			int attint = DefaultPolicyAttackFilter(index+1);
 			
+			if(attint >= 0)
+				index = attint;
+
 			MCTSNode action = defaultList[rnd.Next(0, index + 1)];
 			
 			if(action.action == Action.MOVE) {
@@ -361,30 +421,46 @@ public class NNMCTS : MonoBehaviour {
 				NNAIGameFlow.activeUnit.Attack(gameState[action.mbagsH, action.mbagsW], gameState[action.gsH, action.gsW]);
 			}
 			
-			depth++;
-			totalcalls++;
+
 			result = NNAIGameFlow.Instance.StartNextTurn();
 
-//			if(depth > 30) {
+//			totalcalls++;
+//			depth++;
+//			if(depth > 25) {
 //				result = NNTrainer.Instance.ValueOfState();
 //
 //				//The output from the ValueOfState is between [0,1] where 1 is a state value favouring the AI whereas 0 is favouring the PLAYER
-//				if(result > 0.5f)
+//				if(result > 0.6f)
 //					result = 1;
-//				else 
-//					result = 0;
+//				else if (result <= 0.6f && result > 0.4f)
+//					result = 0.7f;
+//				else
+//					result = 0f;
 //
 //				break;
 //			}
 		}
 		
-		if(depth < minDefaultDepth)
-			minDefaultDepth = depth;
-		
-		if(depth > maxDefaultDepth)
-			maxDefaultDepth = depth;
+//		if(depth < minDefaultDepth)
+//			minDefaultDepth = depth;
+//		
+//		if(depth > maxDefaultDepth)
+//			maxDefaultDepth = depth;
 
 		return result;
+	}
+
+	int DefaultPolicyAttackFilter(int index) {
+		
+		int rValue = -1;
+		
+		for(int i = 0; i < index; i++) {
+			if(defaultList[i].action == Action.ATTACK) {
+				defaultList[++rValue] = defaultList[i];
+			}
+		}
+		
+		return rValue;
 	}
 	
 	/// <summary>
@@ -398,6 +474,10 @@ public class NNMCTS : MonoBehaviour {
 	
 	float UCTValuePlayer(MCTSNode n, float C) {
 		return (float)((n.reward / n.timeVisited) - C*(Math.Sqrt(2*Math.Log(n.parent.timeVisited) / n.timeVisited)));
+	}
+
+	float UCTValuePlayerRobustChild(MCTSNode n, float C) {
+		return (float)((n.reward / n.timeVisited) - C*Math.Sqrt(2*Math.Log(n.timeVisited)));
 	}
 	
 	/// <summary>
