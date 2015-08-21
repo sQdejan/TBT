@@ -118,15 +118,17 @@ public class GameFlow : MonoBehaviour {
 		GameObject tmpObject = unitTurnOrderList[curTurnIndex];
 
 		if(tmpObject.tag == "PlayerUnit") {
+			//--------------------------Below for player controller
+
 			PlayerController.Instance.currentUnit = tmpObject;
-			//Show what unit is the current active
 			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
-			//Show posssible moves
 			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+
 			//Used in MCTS
 			didPlayerHaveATurn = true;
 
-			//Below for NNMCTS
+			//--------------------------Below for NNMCTS
+
 //			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
 //			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 //
@@ -135,15 +137,17 @@ public class GameFlow : MonoBehaviour {
 
 			return true;
 		} else {
-			//AI shashizzle in here
-//			Debug.Log("Starting the process");
-
-			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+			//--------------------------For BT
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+			tmpObject.GetComponent<BehaviourTree>().TakeMove();
 
-//			AIGameFlow.Instance.SetupGameState();
-			EnhAIGameFlow.Instance.SetupGameState();
-			didAIHaveATurn = true;
+			//--------------------------Below for MCTS
+//			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+//			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+//
+////			AIGameFlow.Instance.SetupGameState();
+//			EnhAIGameFlow.Instance.SetupGameState();
+//			didAIHaveATurn = true;
 
 			return false;
 		}	
@@ -239,7 +243,7 @@ public class GameFlow : MonoBehaviour {
 		if(turnsTaken >= MAX_TURNS) {
 			draw++;
 			gameOutcome = 10;
-//			StartCoroutine(DelayedRestart());
+			StartCoroutine(DelayedRestart());
 			return true;
 		}
 
@@ -266,7 +270,7 @@ public class GameFlow : MonoBehaviour {
 			gameOutcome = 20;
 		}
 
-//		StartCoroutine(DelayedRestart());
+		StartCoroutine(DelayedRestart());
 
 		return true;
 	}
@@ -390,7 +394,7 @@ public class GameFlow : MonoBehaviour {
 	//necessary for NEAT.
 	public void SoftRestartGame() {
 
-		Debug.Log("After game " + ++gamesplayed + " the score is white(enh, 7000): " + teamWhite + " - red(enh++, 7000): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+		Debug.Log("After game " + ++gamesplayed + " the score is white(enh++, 15000): " + teamWhite + " - red(enh++, 25000): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
 
 		turnsTaken = 0;
 

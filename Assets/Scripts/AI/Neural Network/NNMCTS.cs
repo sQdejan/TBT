@@ -87,7 +87,7 @@ public class NNMCTS : MonoBehaviour {
 
 //		sw.ElapsedMilliseconds < RUN_TIME
 
-		while(i < 7000) {
+		while(i < 15000) {
 			
 			if(worker.CancellationPending) {
 				e.Cancel = true;
@@ -281,7 +281,7 @@ public class NNMCTS : MonoBehaviour {
 				}
 			}
 			
-		} else if (curTurn == NNAIGameFlow.GS_PLAYER || C == 0) {
+		} else if (curTurn == NNAIGameFlow.GS_PLAYER) {
 
 			bestScore = float.MaxValue;
 			
@@ -308,7 +308,7 @@ public class NNMCTS : MonoBehaviour {
 					float tmpUCTValue = 0;
 
 					//Bias towards attack
-					if(currentNode.children[i].action == Action.ATTACK && C != 0)
+					if(currentNode.children[i].action == Action.ATTACK)
 						tmpUCTValue = UCTValuePlayer(currentNode.children[i], ECAtt);
 					else
 						tmpUCTValue = UCTValuePlayer(currentNode.children[i], C);

@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AI\AIGameFlow.cs" />
+     <Compile Include="Assets\Scripts\AI\Behaviour Trees\BTRanger.cs" />
+     <Compile Include="Assets\Scripts\AI\Behaviour Trees\BTWarrior.cs" />
+     <Compile Include="Assets\Scripts\AI\Behaviour Trees\BehaviourTree.cs" />
      <Compile Include="Assets\Scripts\AI\EnhMCTS\EnhAIGameFlow.cs" />
      <Compile Include="Assets\Scripts\AI\EnhMCTS\EnhMCTS.cs" />
      <Compile Include="Assets\Scripts\AI\MCTS.cs" />
