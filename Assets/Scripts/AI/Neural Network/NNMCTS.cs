@@ -7,7 +7,7 @@ using System;
 
 //IMPORTANT Current setup: for Enhanced MCTS
 //Alternative is NNMCTS
-//Alternative is normal, remember to adjust NNAIGameFlow draw value to normal and remove filter in DefaultPolicy
+//Alternative is normal, remember to adjust NNAIGameFlow draw value to normal and remove filter in DefaultPolicy (ECAtt and everything makes a bit hard to change it to normal)
 //Alternative is EnhMCTS, do opposite of above
 
 public class NNMCTS : MonoBehaviour {
@@ -87,7 +87,7 @@ public class NNMCTS : MonoBehaviour {
 
 //		sw.ElapsedMilliseconds < RUN_TIME
 
-		while(i < 15000) {
+		while(i < 7000) {
 			
 			if(worker.CancellationPending) {
 				e.Cancel = true;

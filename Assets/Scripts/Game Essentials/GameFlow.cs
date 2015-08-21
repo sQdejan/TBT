@@ -120,26 +120,28 @@ public class GameFlow : MonoBehaviour {
 		if(tmpObject.tag == "PlayerUnit") {
 			//--------------------------Below for player controller
 
-			PlayerController.Instance.currentUnit = tmpObject;
-			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
-			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
-
-			//Used in MCTS
-			didPlayerHaveATurn = true;
+//			PlayerController.Instance.currentUnit = tmpObject;
+//			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
+//			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+//
+//			//Used in MCTS
+//			didPlayerHaveATurn = true;
 
 			//--------------------------Below for NNMCTS
 
-//			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
-//			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
-//
-//			NNAIGameFlow.Instance.SetupGameState();
-//			didPlayerHaveATurn = true;
+			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+
+			NNAIGameFlow.Instance.SetupGameState();
+			didPlayerHaveATurn = true;
 
 			return true;
 		} else {
 			//--------------------------For BT
 			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 			tmpObject.GetComponent<BehaviourTree>().TakeMove();
+
+			didAIHaveATurn = true;
 
 			//--------------------------Below for MCTS
 //			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
@@ -394,7 +396,7 @@ public class GameFlow : MonoBehaviour {
 	//necessary for NEAT.
 	public void SoftRestartGame() {
 
-		Debug.Log("After game " + ++gamesplayed + " the score is white(enh++, 15000): " + teamWhite + " - red(enh++, 25000): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+		Debug.Log("After game " + ++gamesplayed + " the score is white(enh++, 7000): " + teamWhite + " - red(BT): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
 
 		turnsTaken = 0;
 

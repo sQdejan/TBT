@@ -80,7 +80,7 @@ public class EnhMCTS : MonoBehaviour {
 
 //		sw.ElapsedMilliseconds < RUN_TIME
 
-		while(i < 25000) {
+		while(i < 7000) {
 			
 			if(worker.CancellationPending) {
 				e.Cancel = true;

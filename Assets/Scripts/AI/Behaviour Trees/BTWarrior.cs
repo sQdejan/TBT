@@ -25,11 +25,8 @@ public class BTWarrior : BehaviourTree {
 			}
 		}
 
-		if(!CanIAttack()) {
+		if(!CanIAttack()) 
 			MoveAggresive();
-		} 
-
-//		move = poss[Random.Range(0, poss.Count)]; 
 
 		StartCoroutine(EndMove());
 	}
@@ -101,10 +98,8 @@ public class BTWarrior : BehaviourTree {
 		List<int> indexes = new List<int>();
 
 		for(int i = 0; i < poss.Count; i++) {
-			if(IsTileHomeFree(poss[i].gsH, poss[i].gsW)) {
-				Debug.Log("h " + poss[i].gsH + " and w " + poss[i].gsW + " are free");
+			if(IsTileHomeFree(poss[i].gsH, poss[i].gsW))
 				indexes.Add(i);
-			}
 		}
 
 		if(indexes.Count == 0)
@@ -122,23 +117,32 @@ public class BTWarrior : BehaviourTree {
 		int gridW = GridController.Instance.gridWidth;
 
 		for(int i = -1; i <= 1; i += 2) {
-
 			int hDir = h + i;
 
-			for(int j = -1; j <= 1; j += 2) {
-				int wDir = w + j;
+			//Up/down
+			while(hDir >= 0 && hDir < gridH) {
+				if(GridController.Instance.tileArray[hDir, w].occupied) {
+					if(GridController.Instance.tileArray[hDir, w].occupier.tag == "PlayerUnit" && GridController.Instance.tileArray[hDir, w].occupier.GetComponent<Unit>().classType == ClassType.RANGED)
+						return false;
+					else
+						break;
+				} 
 
-				while(hDir >= 0 && hDir < gridH && wDir >= 0 && wDir < gridW) {
-					if(GridController.Instance.tileArray[hDir, wDir].occupied && GridController.Instance.tileArray[hDir, wDir].occupier.tag == "PlayerUnit") {
-						if(GridController.Instance.tileArray[hDir, wDir].occupier.GetComponent<Unit>().classType == ClassType.RANGED)
-							return false;
-						else
-							break;
-					}
+				hDir += i;
+			}
 
-					hDir += i;
-					wDir += j;
-				}
+			int wDir = w + i;
+
+			//Left/right
+			while(wDir >= 0 && wDir < gridW) {
+				if(GridController.Instance.tileArray[h, wDir].occupied) {
+					if(GridController.Instance.tileArray[h, wDir].occupier.tag == "PlayerUnit" && GridController.Instance.tileArray[h, wDir].occupier.GetComponent<Unit>().classType == ClassType.RANGED)
+						return false;
+					else
+						break;
+				} 
+				
+				wDir += i;
 			}
 		}
 
@@ -227,18 +231,5 @@ public class BTWarrior : BehaviourTree {
 		}
 	}
 
-	float Distance(int h, int w, Points2D p2D) {
-		return (float)(Mathf.Sqrt(Mathf.Pow(h - p2D.h, 2) + Mathf.Pow(w - p2D.w, 2)));
-	}
-
 	#endregion
 }
-
-class Points2D {
-	public int h, w;
-
-	public Points2D (int h, int w) {
-		this.h = h;
-		this.w = w;
-	}
-} 
