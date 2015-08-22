@@ -41,6 +41,8 @@ public abstract class Unit : MonoBehaviour {
 	//I need this in order to reset it's stats once a Unit is moving
 	[HideInInspector] public GameObject curTile;
 
+	IEnumerator coroutineThinking;
+
 	//For resetting
 	Vector3 oriPosition;
 	Vector3 oriPositionSpriteChild;
@@ -68,6 +70,8 @@ public abstract class Unit : MonoBehaviour {
 		FindTile();
 
 		oriSpriteColor = GetComponentInChildren<SpriteRenderer>().color;
+
+		coroutineThinking = ShowThinking();
 
 		oriPosition = transform.position;
 		oriPositionSpriteChild = spriteChild.transform.position;
@@ -134,7 +138,6 @@ public abstract class Unit : MonoBehaviour {
 
 			yield return new WaitForFixedUpdate();
 		}
-
 	}
 
 	public void TakeDamage(int damage) {
@@ -146,20 +149,20 @@ public abstract class Unit : MonoBehaviour {
 	}
 
 	IEnumerator DamageEffect() {
-		float effectTime = 0.2f;
+		float effectTime = 0.3f;
 		float time = 0;
 
 		SpriteRenderer tmpSprRen = GetComponentInChildren<SpriteRenderer>();
 
 		while(time < effectTime / 2) {
-			tmpSprRen.color = Color.Lerp(tmpSprRen.color, damageSpriteColor, time/(effectTime/2));
+			tmpSprRen.color = Color.Lerp(oriSpriteColor, damageSpriteColor, time/(effectTime/2));
 			time += Time.fixedDeltaTime;
 			yield return new WaitForFixedUpdate();
 		}
 
 		time = 0;
 		while(time < effectTime / 2) {
-			tmpSprRen.color = Color.Lerp(tmpSprRen.color, oriSpriteColor, time/(effectTime/2));
+			tmpSprRen.color = Color.Lerp(damageSpriteColor, oriSpriteColor, time/(effectTime/2));
 			time += Time.fixedDeltaTime;
 			yield return new WaitForFixedUpdate();
 		}
@@ -176,5 +179,37 @@ public abstract class Unit : MonoBehaviour {
 	void OnGUI() {
 		Vector3 pos = Camera.main.WorldToScreenPoint(spriteChild.transform.position);
 		GUI.Label(new Rect(pos.x, Screen.height - pos.y - (Screen.height / 12), 15, 20), health.ToString(), style);
+	}
+
+	public void StartThinking() {
+		StartCoroutine(coroutineThinking);
+	}
+
+	public void StopThinking() {
+		StopCoroutine(coroutineThinking);
+		GetComponentInChildren<SpriteRenderer>().color = oriSpriteColor;
+	}
+
+	IEnumerator ShowThinking() {
+
+		SpriteRenderer tmpSprRen = GetComponentInChildren<SpriteRenderer>();
+		float effectTime = 1;
+		float time = 0;
+
+		Color col1 = oriSpriteColor;
+		Color col2 = activeSpriteColor;
+
+		while(true) {
+			tmpSprRen.color = Color.Lerp(col1, col2, time/effectTime);
+			time += Time.fixedDeltaTime;
+			yield return new WaitForFixedUpdate();
+
+			if(time > effectTime) {
+				time = 0;
+				Color tmp = col2;
+				col2 = col1;
+				col1 = tmp;
+			}
+		}
 	}
 }

@@ -80,7 +80,7 @@ public class EnhMCTS : MonoBehaviour {
 
 //		sw.ElapsedMilliseconds < RUN_TIME
 
-		while(i < 7000) {
+		while(i < 15000) {
 			
 			if(worker.CancellationPending) {
 				e.Cancel = true;
@@ -96,7 +96,6 @@ public class EnhMCTS : MonoBehaviour {
 			//			test.Reset();
 		}
 		sw.Stop();
-		
 		//Find the best move
 		currentNode = rootNode;
 		BestMove();

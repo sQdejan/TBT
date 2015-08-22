@@ -57,6 +57,8 @@ public class GameFlow : MonoBehaviour {
 	RectTransform rtActive;
 	Vector3 rtOriScale;
 
+	GameObject curAIActiveUnit;
+
 	#region properties
 
 	public List<GameObject> UnitTurnOrderList {
@@ -101,7 +103,7 @@ public class GameFlow : MonoBehaviour {
 		if(!IsGameOver()) {
 			playersCurrentTurn = StartNextTurn();
 			UpdateImageTurnDisplay();
-//			UpdateTurnText();
+			UpdateTurnText();
 		} else {
 			playersCurrentTurn = false; //Just to reset shashizzle in playercontroller
 		}
@@ -115,41 +117,50 @@ public class GameFlow : MonoBehaviour {
 		if(++curTurnIndex >= unitTurnOrderList.Count)
 			curTurnIndex = 0;
 
+		if(curAIActiveUnit && curAIActiveUnit.activeSelf) {
+			curAIActiveUnit.GetComponent<Unit>().StopThinking();
+			curAIActiveUnit = null;
+		}
+
 		GameObject tmpObject = unitTurnOrderList[curTurnIndex];
 
 		if(tmpObject.tag == "PlayerUnit") {
 			//--------------------------Below for player controller
 
-//			PlayerController.Instance.currentUnit = tmpObject;
-//			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
-//			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
-//
-//			//Used in MCTS
-//			didPlayerHaveATurn = true;
+			PlayerController.Instance.currentUnit = tmpObject;
+			PlayerController.Instance.currentUnit.GetComponentInChildren<SpriteRenderer>().color = PlayerController.Instance.currentUnit.GetComponent<Unit>().activeSpriteColor;
+			PlayerController.Instance.currentUnit.GetComponent<Unit>().ShowPossibleMoves();
+
+			//Used in MCTS
+			didPlayerHaveATurn = true;
 
 			//--------------------------Below for NNMCTS
 
-			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
-			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
-
-			NNAIGameFlow.Instance.SetupGameState();
-			didPlayerHaveATurn = true;
-
-			return true;
-		} else {
-			//--------------------------For BT
-			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
-			tmpObject.GetComponent<BehaviourTree>().TakeMove();
-
-			didAIHaveATurn = true;
-
-			//--------------------------Below for MCTS
 //			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
 //			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 //
-////			AIGameFlow.Instance.SetupGameState();
-//			EnhAIGameFlow.Instance.SetupGameState();
+//			NNAIGameFlow.Instance.SetupGameState();
+//			didPlayerHaveATurn = true;
+
+			return true;
+		} else {
+
+			//--------------------------For BT
+//			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+//			tmpObject.GetComponent<BehaviourTree>().TakeMove();
+//
 //			didAIHaveATurn = true;
+
+			//--------------------------Below for MCTS
+			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+
+//			AIGameFlow.Instance.SetupGameState();
+			EnhAIGameFlow.Instance.SetupGameState();
+			didAIHaveATurn = true;
+
+			curAIActiveUnit = tmpObject;
+			curAIActiveUnit.GetComponent<Unit>().StartThinking();
 
 			return false;
 		}	
@@ -157,23 +168,7 @@ public class GameFlow : MonoBehaviour {
 
 	void UpdateTurnText() {
 
-		string tmpString = "";
-		for(int i = curTurnIndex; i < unitTurnOrderList.Count; i++) {
-			if(curTurnIndex == 0 && i == unitTurnOrderList.Count - 1)
-				tmpString += unitTurnOrderList[i].name;
-			else 
-				tmpString += unitTurnOrderList[i].name + "    ";
-		}
-
-		if(curTurnIndex > 0) {
-			for(int i = 0; i < curTurnIndex; i++) {
-				if(i != curTurnIndex - 1) 
-					tmpString += unitTurnOrderList[i].name + "    ";
-				else 
-					tmpString += unitTurnOrderList[i].name;
-			}
-		}
-
+		string tmpString = "Turns taken: " + turnsTaken + " / 100";
 		turnDisplayer.text = tmpString;
 	}
 
@@ -181,6 +176,7 @@ public class GameFlow : MonoBehaviour {
 
 		if(rtActive) {
 			rtActive.localScale = rtOriScale;
+			rtActive.gameObject.GetComponent<ImageHover>().amICurUnit = false;
 			rtActive = null;
 		}
 
@@ -199,6 +195,7 @@ public class GameFlow : MonoBehaviour {
 			if(firstTime) {
 				rtActive = displayTurnOrderList[i].GetComponent<RectTransform>();
 				rtActive.localScale = hoverActiveScale;
+				rtActive.gameObject.GetComponent<ImageHover>().amICurUnit = true;
 //				startpoint += offset;
 				firstTime = false;
 			}
@@ -214,6 +211,7 @@ public class GameFlow : MonoBehaviour {
 				if(firstTime) {
 					rtActive = displayTurnOrderList[i].GetComponent<RectTransform>();
 					rtActive.localScale = hoverActiveScale;
+					rtActive.gameObject.GetComponent<ImageHover>().amICurUnit = true;
 //					startpoint += offset;
 					firstTime = false;
 				}
@@ -430,5 +428,4 @@ public class GameFlow : MonoBehaviour {
 
 		StartCoroutine(DelayStart());
 	}
-
 }

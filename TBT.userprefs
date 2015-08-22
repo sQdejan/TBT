@@ -1,10 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/AI/Behaviour Trees/BehaviourTree.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Game Essentials/GameFlow.cs">
     <Files>
-      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="401" Column="18" />
-      <File FileName="Assets/Scripts/AI/Neural Network/NNMCTS.cs" Line="90" Column="17" />
-      <File FileName="Assets/Scripts/AI/Behaviour Trees/BehaviourTree.cs" Line="27" Column="97" />
+      <File FileName="Assets/Scripts/AI/EnhMCTS/EnhMCTS.cs" Line="99" Column="1" />
+      <File FileName="Assets/Scripts/Game Essentials/GameFlow.cs" Line="431" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

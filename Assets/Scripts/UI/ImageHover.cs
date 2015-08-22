@@ -8,6 +8,8 @@ public class ImageHover : MonoBehaviour {
 	public GameObject goUnitToHightlight;
 	public Color colorUnitHighlight;
 
+	public bool amICurUnit = false;
+
 	RectTransform thisRectTrans;
 	Image thisImage;
 	Color imageOriColor;
@@ -30,6 +32,9 @@ public class ImageHover : MonoBehaviour {
 	}
 
 	void Update () {
+		if(amICurUnit)
+			return;
+
 		if(!IsMouseOverImage())
 			return;
 
