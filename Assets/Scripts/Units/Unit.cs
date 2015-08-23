@@ -175,8 +175,11 @@ public abstract class Unit : MonoBehaviour {
 		gameObject.SetActive(false);
 	}
 
-	//I seriously need to consider this
+	//I seriously need to reconsider this
 	void OnGUI() {
+		if(UIFlow.UIActive)
+			return;
+
 		Vector3 pos = Camera.main.WorldToScreenPoint(spriteChild.transform.position);
 		GUI.Label(new Rect(pos.x, Screen.height - pos.y - (Screen.height / 12), 15, 20), health.ToString(), style);
 	}

@@ -29,10 +29,13 @@ public class GameFlow : MonoBehaviour {
 	public GameObject playerUnits;
 	public GameObject AIUnits;
 	public Text turnDisplayer;
+	public Text textCurAIPlayer;
 
 	public GameObject hoverPlayerUnits;
 	public GameObject hoverAIUnits;
 	public Vector3 hoverActiveScale;
+
+	public GameObject questionnaireBetween;
 
 	[HideInInspector]
 	public int turnsTaken = 0;
@@ -40,6 +43,12 @@ public class GameFlow : MonoBehaviour {
 	public static bool playersCurrentTurn = false;
 	public static bool restartGame = false;
 	public static float gameOutcome = 0;
+
+	public static bool btAI = false;
+	public static bool didStartWithBT = false;
+	public static int playerid;
+	public static bool firstGame = true;
+	public static bool isgameover = false;
 
 	//The two following variables are used in order to save what is on the curren tree
 	//to use the statistics for further simulation in MCTS
@@ -88,7 +97,30 @@ public class GameFlow : MonoBehaviour {
 
 		rtOriScale = displayTurnOrderList[0].GetComponent<RectTransform>().localScale;
 
-		StartCoroutine(DelayStart());
+
+//		StartCoroutine(DelayStart());
+
+		//For testing I set half to start with BT and other half starting with through random (easiest way)
+		//I change btAI before the game starts so it will be flipped
+		if(1 == Random.Range(1,3)) {
+			btAI = false;
+			didStartWithBT = true;
+		} else { 
+			btAI = true;
+			didStartWithBT = false;
+		}
+
+		if(!btAI)
+			textCurAIPlayer.text = "Opponent: BT-player";
+		else
+			textCurAIPlayer.text = "Opponent: MCTS-player";
+
+
+		playerid = Random.Range(0, int.MaxValue);
+	}
+
+	public void StartTheGame() {
+		SoftRestartGame();
 	}
 
 	//I need to delay it if AI has to start because
@@ -145,19 +177,21 @@ public class GameFlow : MonoBehaviour {
 			return true;
 		} else {
 
-			//--------------------------For BT
-//			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
-//			tmpObject.GetComponent<BehaviourTree>().TakeMove();
-//
-//			didAIHaveATurn = true;
+			if(btAI) {
+				//--------------------------For BT
+				tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+				tmpObject.GetComponent<BehaviourTree>().TakeMove();
 
-			//--------------------------Below for MCTS
-			tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
-			tmpObject.GetComponent<Unit>().ShowPossibleMoves();
+				didAIHaveATurn = true;
+			} else { 
+				//--------------------------Below for MCTS
+				tmpObject.GetComponentInChildren<SpriteRenderer>().color = tmpObject.GetComponent<Unit>().activeSpriteColor;
+				tmpObject.GetComponent<Unit>().ShowPossibleMoves();
 
-//			AIGameFlow.Instance.SetupGameState();
-			EnhAIGameFlow.Instance.SetupGameState();
-			didAIHaveATurn = true;
+	//			AIGameFlow.Instance.SetupGameState();
+				EnhAIGameFlow.Instance.SetupGameState();
+				didAIHaveATurn = true;
+			}
 
 			curAIActiveUnit = tmpObject;
 			curAIActiveUnit.GetComponent<Unit>().StartThinking();
@@ -240,10 +274,13 @@ public class GameFlow : MonoBehaviour {
 
 	public bool IsGameOver() {
 
+		if(isgameover)
+			return true;
+
 		if(turnsTaken >= MAX_TURNS) {
 			draw++;
-			gameOutcome = 10;
-			StartCoroutine(DelayedRestart());
+			gameOutcome = 1;
+			StartCoroutine(DelayQuestionnaire(3.1f));
 			return true;
 		}
 
@@ -267,16 +304,32 @@ public class GameFlow : MonoBehaviour {
 		} else {
 //			Debug.Log("You won, nice!");
 			teamWhite++;
-			gameOutcome = 20;
+			gameOutcome = 2;
 		}
 
-		StartCoroutine(DelayedRestart());
+		StartCoroutine(DelayQuestionnaire(3.1f));
 
+		isgameover = true;
 		return true;
+	}
+	
+	public void DelayRestart() {
+		StartCoroutine(DelayedRestart());
+	}
+
+	public void ButtonQuestionnaire() {
+		EnhAIGameFlow.Instance.CancelBackgroundWorker();
+		StartCoroutine(DelayQuestionnaire(0));
+	}
+
+	IEnumerator DelayQuestionnaire(float time) {
+		yield return new WaitForSeconds(time);
+		questionnaireBetween.SetActive(true);
+		QuestionnaireBetween.Instance.ResetQuestionnaire();
 	}
 
 	IEnumerator DelayedRestart() {
-		yield return new WaitForSeconds(1.1f);
+		yield return new WaitForSeconds(0.3f);
 		SoftRestartGame();
 	}
 
@@ -390,11 +443,19 @@ public class GameFlow : MonoBehaviour {
 		}
 	}
 
+
 	//Restarting the game without reloading the level
 	//necessary for NEAT.
 	public void SoftRestartGame() {
 
-		Debug.Log("After game " + ++gamesplayed + " the score is white(enh++, 7000): " + teamWhite + " - red(BT): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+//		Debug.Log("After game " + ++gamesplayed + " the score is white(enh++, 7000): " + teamWhite + " - red(BT): " + teamRed + " - draw: " + draw + " - turns taken: " + turnsTaken);
+
+		btAI = !btAI;
+
+		if(btAI)
+			textCurAIPlayer.text = "Opponent: BT-player";
+		else
+			textCurAIPlayer.text = "Opponent: MCTS-player";
 
 		turnsTaken = 0;
 
@@ -426,6 +487,13 @@ public class GameFlow : MonoBehaviour {
 			displayTurnOrderList.Add(hoverPlayerUnits.transform.GetChild(i).gameObject);
 		}
 
+		isgameover = false;
 		StartCoroutine(DelayStart());
 	}
+
+	public void SendResults(string url) {
+
+	}
+
+
 }

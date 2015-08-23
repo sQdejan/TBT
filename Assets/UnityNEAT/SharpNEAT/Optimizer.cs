@@ -114,35 +114,37 @@ public class Optimizer : MonoBehaviour {
         {
             experiment.SavePopulation(xw, new NeatGenome[] { _ea.CurrentChampGenome });
         }
+	
+		Debug.LogError("REMEMBER TO OUTCOMMENT THIS SHIT");
 
-		if(!File.Exists(generationFitness)) {
-			using(StreamWriter sw = File.CreateText(generationFitness)) {
-
-				sw.WriteLine("------ New generation " + myGen++ + " -----");
-
-				fitnessList.Sort();
-
-				foreach(float f in fitnessList) {
-					sw.WriteLine(f.ToString());
-				}
-
-				sw.WriteLine("------ Ends here -----");
-				sw.WriteLine("");
-			}
-		} else {
-			using(StreamWriter sw = File.AppendText(generationFitness)) {
-				sw.WriteLine("------ New generation " + myGen++ + " -----");
-				
-				fitnessList.Sort();
-				
-				foreach(float f in fitnessList) {
-					sw.WriteLine(f.ToString());
-				}
-				
-				sw.WriteLine("------ Ends here -----");
-				sw.WriteLine("");
-			}
-		}
+//		if(!File.Exists(generationFitness)) {
+//			using(StreamWriter sw = File.CreateText(generationFitness)) {
+//
+//				sw.WriteLine("------ New generation " + myGen++ + " -----");
+//
+//				fitnessList.Sort();
+//
+//				foreach(float f in fitnessList) {
+//					sw.WriteLine(f.ToString());
+//				}
+//
+//				sw.WriteLine("------ Ends here -----");
+//				sw.WriteLine("");
+//			}
+//		} else {
+//			using(StreamWriter sw = File.AppendText(generationFitness)) {
+//				sw.WriteLine("------ New generation " + myGen++ + " -----");
+//				
+//				fitnessList.Sort();
+//				
+//				foreach(float f in fitnessList) {
+//					sw.WriteLine(f.ToString());
+//				}
+//				
+//				sw.WriteLine("------ Ends here -----");
+//				sw.WriteLine("");
+//			}
+//		}
 
 
 //        DateTime endTime = DateTime.Now;

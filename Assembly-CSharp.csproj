@@ -79,6 +79,11 @@
      <Compile Include="Assets\Scripts\Testing\UnitTest.cs" />
      <Compile Include="Assets\Scripts\UI\ActiveFrame.cs" />
      <Compile Include="Assets\Scripts\UI\ImageHover.cs" />
+     <Compile Include="Assets\Scripts\UI\MakeSure.cs" />
+     <Compile Include="Assets\Scripts\UI\QuestionnaireBefore.cs" />
+     <Compile Include="Assets\Scripts\UI\QuestionnaireBetween.cs" />
+     <Compile Include="Assets\Scripts\UI\UIFlow.cs" />
+     <Compile Include="Assets\Scripts\UI\URLSender.cs" />
      <Compile Include="Assets\Scripts\Units\Ranger.cs" />
      <Compile Include="Assets\Scripts\Units\Runner.cs" />
      <Compile Include="Assets\Scripts\Units\Unit.cs" />

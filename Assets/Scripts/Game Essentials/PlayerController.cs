@@ -63,6 +63,11 @@ public class PlayerController : MonoBehaviour {
 
 		CursorIcon();
 
+		if(UIFlow.UIActive) {
+			cursorState = CursorState.NORMAL;
+			return;
+		}
+
 		if(!GameFlow.playersCurrentTurn)
 			return;
 

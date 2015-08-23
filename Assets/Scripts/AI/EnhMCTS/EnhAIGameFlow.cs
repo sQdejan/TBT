@@ -120,7 +120,7 @@ public class EnhAIGameFlow : MonoBehaviour {
 			Debug.LogError(e.Error.Message + e.Error.StackTrace);
 		} else if(e.Cancelled) {
 			Debug.Log("Event is cancelled and the game is restarted");
-			GameFlow.restartGame = true;
+//			GameFlow.restartGame = true;
 		}
 	}
 	
@@ -269,7 +269,8 @@ public class EnhAIGameFlow : MonoBehaviour {
 	
 	//If I reset the scene I abort the thread for good measures
 	public void CancelBackgroundWorker() {
-		MCTSBackgroundWorker.CancelAsync();
+		if(MCTSBackgroundWorker != null)
+			MCTSBackgroundWorker.CancelAsync();
 	}
 	
 	#endregion
