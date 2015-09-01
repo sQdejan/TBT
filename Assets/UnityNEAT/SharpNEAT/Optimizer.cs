@@ -52,7 +52,7 @@ public class Optimizer : MonoBehaviour {
 
         print(champFileSavePath);
 
-		StartEA();
+//		StartEA();
 	}
 
     public void StartEA()
@@ -213,6 +213,8 @@ public class Optimizer : MonoBehaviour {
         // Decode the genome into a phenome (neural network).
         var phenome = genomeDecoder.Decode(genome);
 
+		NNTrainer.Instance.Activate(phenome);
+
 //        GameObject obj = Instantiate(Unit, Unit.transform.position, Unit.transform.rotation) as GameObject;
 //        UnitController controller = obj.GetComponent<UnitController>();
 //
@@ -247,10 +249,10 @@ public class Optimizer : MonoBehaviour {
 
     void OnGUI()
     {
-		GUI.Label(new Rect(10,10, 300, 40), Application.persistentDataPath);
-		GUI.Label(new Rect(10, 60, 300, 40), "Generation: " + myGen);
-		GUI.Label(new Rect(10, 110, 300, 40), "Organism: " + curOrganism);
-		GUI.Label(new Rect(10, 160, 300, 40), "Iteration: " + curIteration);
+//		GUI.Label(new Rect(10,10, 300, 40), Application.persistentDataPath);
+//		GUI.Label(new Rect(10, 60, 300, 40), "Generation: " + myGen);
+//		GUI.Label(new Rect(10, 110, 300, 40), "Organism: " + curOrganism);
+//		GUI.Label(new Rect(10, 160, 300, 40), "Iteration: " + curIteration);
 
 //        if (GUI.Button(new Rect(10, 10, 100, 40), "Start EA"))
 //        {
